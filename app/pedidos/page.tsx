@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from 'react';
 import { Search, Plus, Eye } from 'lucide-react';
 
@@ -138,12 +139,11 @@ const PedidosPage = () => {
       <header className="bg-white shadow-sm px-8 py-4 flex justify-between items-center">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-2">
-            <div className="w-12 h-12 bg-blue-700 rounded flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                <path d="M8 12h8M12 8v8" stroke="currentColor" strokeWidth="2"/>
-              </svg>
-            </div>
+            <img 
+              src="/logo.svg" 
+              alt="Logo" 
+              className="w-12 h-12"
+            />
             <span className="text-xl font-semibold text-blue-700">Lavanderia</span>
           </div>
           <nav className="flex gap-6">
@@ -166,39 +166,39 @@ const PedidosPage = () => {
         </button>
       </header>
 
-    /* Main Content */
-    <main className="p-8">
+      {/* Main Content */}
+      <main className="p-8">
         <div className="bg-white rounded-lg shadow-sm p-6">
           {/* Filtros e Busca */}
-        <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6">
             <div className="flex items-center gap-6">
-            <h1 className="text-2xl font-semibold text-gray-800">Pedidos</h1>
-            <div className="flex gap-4">
+              <h1 className="text-2xl font-semibold text-gray-800">Pedidos</h1>
+              <div className="flex gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
-                <input
+                  <input
                     type="radio"
                     name="status"
                     className="w-4 h-4"
                     onChange={() => setFiltroStatus('aberto')}
-                />
-                <span className="text-sm text-gray-600">Em aberto - Estoque</span>
+                  />
+                  <span className="text-sm text-gray-600">Em aberto - Estoque</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                <input
+                  <input
                     type="radio"
                     name="status"
                     className="w-4 h-4"
                     onChange={() => setFiltroStatus('pago')}
-                />
-                <span className="text-sm text-gray-600">Pago - Saída</span>
+                  />
+                  <span className="text-sm text-gray-600">Pago - Saída</span>
                 </label>
                 <label className="flex items-center gap-2 cursor-pointer">
-                <input
+                  <input
                     type="radio"
                     name="status"
                     className="w-4 h-4"
                     onChange={() => setFiltroStatus('cancelado')}
-                />
+                  />
                   <span className="text-sm text-gray-600">Cancelado</span>
                 </label>
               </div>
