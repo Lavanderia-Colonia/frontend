@@ -64,8 +64,8 @@
 //   );
 // }
 
-import Header from "../app/components/Header";
-import Table from "@/app/components/Table";
+import Header from "../components/Header";
+import Table from "@/components/Table";
 
 export default function PedidosPage() {
   return (

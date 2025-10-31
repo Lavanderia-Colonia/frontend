@@ -1,4 +1,4 @@
-import StatusBadge from "@/app/components/StatusBadge";
+import StatusBadge from "@/components/StatusBadge";
 import { Eye } from "lucide-react";
 
 interface Pedido {
