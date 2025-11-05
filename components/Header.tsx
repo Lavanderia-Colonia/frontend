@@ -18,10 +18,6 @@ export default function Header() {
       </div>
 
       <div className="flex items-center gap-4 text-sm text-slate-600">
-        {/* <button className="hidden md:inline-flex items-center gap-2 rounded-full px-3 py-2 hover:bg-slate-50">
-          <span>⚙️</span>
-          Configurar
-        </button> */}
         <button className="flex items-center gap-2 rounded-full px-3 py-2 hover:bg-slate-50">
             <Image src="/sair.svg" alt="Sair" width={18} height={18} /> Sair
         </button>

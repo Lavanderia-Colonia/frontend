@@ -57,7 +57,7 @@ export default function ConfirmationModal({
       />
       
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-[470px] h-[260px] mx-4 p-8">
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8">
         {/* Icon */}
         <div className="flex justify-center mb-6">
           <div className={`w-20 h-20 rounded-full ${iconColors[type]} flex items-center justify-center`}>
