@@ -40,49 +40,6 @@ export default function ClientesDashboard() {
     <div className="min-h-screen bg-slate-100">
         <Header />
 
-      {/* Header */}
-      {/* <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-8">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-blue-900 rounded-lg flex items-center justify-center">
-                  <div className="w-10 h-10 border-2 border-white rounded-lg flex items-center justify-center">
-                    <div className="text-white text-xl">🧺</div>
-                  </div>
-                </div>
-              </div>
-              
-              <nav className="flex gap-8">
-                <button 
-                  onClick={() => setActiveTab('pedidos')}
-                  className={`pb-4 text-sm font-medium ${activeTab === 'pedidos' ? 'text-gray-600' : 'text-gray-400'}`}
-                >
-                  Pedidos
-                </button>
-                <button 
-                  onClick={() => setActiveTab('clientes')}
-                  className={`pb-4 text-sm font-medium border-b-2 ${activeTab === 'clientes' ? 'text-blue-900 border-blue-900' : 'text-gray-400 border-transparent'}`}
-                >
-                  Clientes
-                </button>
-                <button 
-                  onClick={() => setActiveTab('configuracoes')}
-                  className={`pb-4 text-sm font-medium ${activeTab === 'configuracoes' ? 'text-gray-600' : 'text-gray-400'}`}
-                >
-                  Configurações
-                </button>
-              </nav>
-            </div>
-            
-            <button className="flex items-center gap-2 text-gray-600 text-sm">
-              <span className="transform rotate-180">→</span>
-              Sair
-            </button>
-          </div>
-        </div> */}
-      {/* </header> */}
-
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
