@@ -169,6 +169,7 @@
 "use client";
 import React, { useState } from "react";
 import { Search, Plus, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type Order = {
   code: string;
@@ -194,6 +195,7 @@ const sample: Order[] = [
 ];
 
 export default function PedidosDashboard() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "paid" | "cancelled">("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -301,7 +303,11 @@ export default function PedidosDashboard() {
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <button className="text-gray-600 hover:text-blue-900 transition-colors">
+                    <button
+                      onClick={() => router.push(`/pedidos/${order.code.replace('#','')}`)}
+                      className="text-gray-600 hover:text-blue-900 transition-colors"
+                      aria-label={`Ver detalhes do pedido ${order.code}`}
+                    >
                       <Eye className="w-5 h-5" />
                     </button>
                   </td>
