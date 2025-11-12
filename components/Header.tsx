@@ -1,5 +1,7 @@
 import Image from "next/image";
 import React from "react";
+import Link from "next/link";
+
 
 export default function Header() {
   return (
@@ -10,9 +12,9 @@ export default function Header() {
             <Image src="/logo.svg" alt="Logo" width={44.81} height={50} className="object-contain" />
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-600">
-            <a className="text-blue-700 border-b-2 border-blue-100 pb-2" href="#">Pedidos</a>
-            <a className="hover:text-slate-800" href="#">Clientes</a>
-            <a className="hover:text-slate-800" href="#">Configurações</a>
+            <Link className="text-blue-700 border-b-2 border-blue-100 pb-2" href="/pedidos">Pedidos</Link>
+            <Link className="hover:text-slate-800" href="/clients">Clientes</Link>
+            <Link className="hover:text-slate-800" href="/configuracoes">Configurações</Link>
           </nav>
         </div>
       </div>
