@@ -82,7 +82,7 @@ export default function Header() {
             <Link 
               href="/orders-table"
               className={`text-base font-medium transition-colors ${
-                isActive("/orders-table")
+                isActive("/orders-table")     
                   ? "text-[#013C72]"
                   : "text-[#727376] hover:text-[#013C72]"
               }`}
@@ -102,9 +102,9 @@ export default function Header() {
             </Link>
             
            <Link 
-              href="/configuracoes"
+              href="/config"
               className={`text-base font-medium transition-colors ${
-                isActive("/configuracoes")
+                isActive("/config")
                   ? "text-[#013C72]"
                   : "text-[#727376] hover:text-[#013C72]"
               }`}

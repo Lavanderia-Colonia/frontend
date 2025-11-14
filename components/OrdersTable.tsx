@@ -216,7 +216,7 @@ export default function PedidosDashboard() {
       <main className="max-w-full mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-6">
-            <h1 className="text-3xl font-semibold text-blue-900">Pedidos</h1>
+            <h1 className="text-3xl font-semibold text-[#013C72]">Pedidos</h1>
             
             <div className="flex items-center gap-4 text-sm">
               <button
@@ -255,7 +255,7 @@ export default function PedidosDashboard() {
               />
             </div>
             
-            <button className="flex items-center gap-2 bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium">
+            <button className="flex items-center gap-2 bg-[#013C72] text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium">
               Cadastrar
               <Plus className="w-5 h-5" />
             </button>
@@ -332,19 +332,19 @@ export default function PedidosDashboard() {
             
             <button 
               onClick={() => setCurrentPage(1)}
-              className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-blue-900 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+              className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
             >
               1
             </button>
             <button 
               onClick={() => setCurrentPage(2)}
-              className={`px-3 py-1 rounded ${currentPage === 2 ? 'bg-blue-900 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+              className={`px-3 py-1 rounded ${currentPage === 2 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
             >
               2
             </button>
             <button 
               onClick={() => setCurrentPage(3)}
-              className={`px-3 py-1 rounded ${currentPage === 3 ? 'bg-blue-900 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+              className={`px-3 py-1 rounded ${currentPage === 3 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
             >
               3
             </button>
@@ -353,7 +353,7 @@ export default function PedidosDashboard() {
             
             <button 
               onClick={() => setCurrentPage(30)}
-              className={`px-3 py-1 rounded ${currentPage === 30 ? 'bg-blue-900 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+              className={`px-3 py-1 rounded ${currentPage === 30 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
             >
               30
             </button>

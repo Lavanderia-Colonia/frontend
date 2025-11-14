@@ -108,13 +108,13 @@ export default function OrderDetails({ params }: OrderDetailsProps) {
               <div className="flex items-center gap-3">
                 <button 
                   onClick={() => router.back()}
-                  className="text-blue-700 hover:text-blue-800"
+                  className="text-[#013C72] hover:text-blue-800"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
-                <h1 className="text-2xl font-semibold text-slate-900">
+                <h1 className="text-2xl font-semibold text-[#013C72]">
                   Detalhes do pedido - {orderData.code}
                 </h1>
                 <button className="ml-2 text-slate-400 hover:text-slate-600">
@@ -127,17 +127,17 @@ export default function OrderDetails({ params }: OrderDetailsProps) {
               <div className="flex items-center gap-3">
                 <button 
                   onClick={handleFinalizar}
-                  className="bg-green-500 hover:bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
+                  className="bg-[#2DAC3E] hover:bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
                 >
                   Finalizar
                 </button>
                 <button 
                   onClick={handleCancelar}
-                  className="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
+                  className="bg-[#DE3737] hover:bg-red-600 text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
                 >
                   Cancelar
                 </button>
-                <button className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors">
+                <button className="bg-[#013C72] hover:bg-blue-800 text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors">
                   Editar
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -172,7 +172,7 @@ export default function OrderDetails({ params }: OrderDetailsProps) {
 
             {/* Detalhes dos Itens */}
             <div>
-              <h2 className="text-xl font-semibold text-blue-900 mb-6">Detalhes dos Itens</h2>
+              <h2 className="text-xl font-semibold text-[#013C72] mb-6">Detalhes dos Itens</h2>
               
               <div className="space-y-4">
                 {orderData.items.map((item, index) => (

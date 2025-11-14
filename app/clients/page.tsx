@@ -2,9 +2,11 @@
 import Header from "@/components/Header";
 import React, { useState } from 'react';
 import { Search, Plus, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 
 export default function ClientesDashboard() {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -86,7 +88,11 @@ export default function ClientesDashboard() {
                   <td className="px-6 py-4 text-sm text-gray-600">{cliente.endereco}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-4">
-                      <button className="text-gray-600 hover:text-blue-900 transition-colors">
+                      <button 
+                        onClick={() => router.push(`/clients/${cliente.id}`)}
+                        className="text-gray-600 hover:text-blue-900 transition-colors"
+                        aria-label={`Ver detalhes de ${cliente.nome}`}
+                      >
                         <Eye className="w-5 h-5" />
                       </button>
                       <button
@@ -164,3 +170,4 @@ export default function ClientesDashboard() {
     </div>
   );
 }
+
