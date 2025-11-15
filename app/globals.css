@@ -5,11 +5,34 @@
   --foreground: #171717;
 }
 
+@font-face {
+  font-family: "Poppins-bold";
+  src: url(../public/fonts/Poppins-Bold.ttf)format("opentype");
+  font: bold;
+}
+
+@font-face {
+  font-family: "Poppins-regular";
+  src: url(../public/fonts/Poppins-Regular.ttf)format("opentype");
+  font: bold;
+}
+
+@layer utilities {
+  .title-default {
+    @apply font-medium leading-none;
+    font-size: 17;
+    font-family: var(--font-title);
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --font-default: 'Poppins-regular';
+  --font-title: 'Poppins-bold';
 }
 
 @media (prefers-color-scheme: dark) {
