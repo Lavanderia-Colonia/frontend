@@ -65,7 +65,7 @@ export default function Header() {
   return (
     <>
       <header className="flex items-center justify-between py-4 px-6 border-b border-slate-200 bg-white">
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-15">
           {/* Logo */}
           <div className="w-14 h-14 flex items-center justify-center">
             <Image 
@@ -78,13 +78,13 @@ export default function Header() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex items-center gap-6 h-14">
+          <nav className="flex items-center gap-10 h-8">
             <Link 
               href="/orders-table"
-              className={`text-base font-medium transition-colors ${
+              className={`title-default mr-10 relative text-base font-medium transition-colors ${
                 isActive("/orders-table")     
-                  ? "text-[#013C72]"
-                  : "text-[#727376] hover:text-[#013C72]"
+                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2  after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
+                  : "text-[#727376] hover:text-title"
               }`}
             >
               Pedidos
@@ -92,10 +92,10 @@ export default function Header() {
             
             <Link 
               href="/clients"
-              className={`text-base font-medium transition-colors ${
+              className={`title-default mr-10 relative text-base font-medium transition-colors ${
                 isActive("/clients")
-                  ? "text-[#013C72]"
-                  : "text-[#727376] hover:text-[#013C72]"
+                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2  after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
+                  : "text-[#727376] hover:text-title"
               }`}  
             >
               Clientes
@@ -103,10 +103,10 @@ export default function Header() {
             
            <Link 
               href="/config"
-              className={`text-base font-medium transition-colors ${
+              className={`title-default mr-10 relative text-base font-medium transition-colors ${
                 isActive("/config")
-                  ? "text-[#013C72]"
-                  : "text-[#727376] hover:text-[#013C72]"
+                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2  after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
+                  : "text-[#727376] hover:text-title"
               }`}
             >
               Configurações
