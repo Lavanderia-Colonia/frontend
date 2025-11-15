@@ -221,21 +221,21 @@ export default function PedidosDashboard() {
             <div className="flex items-center gap-4 text-sm">
               <button
                 onClick={() => setStatusFilter(statusFilter === "open" ? "all" : "open")}
-                className={`flex items-center gap-2 ${statusFilter === "open" ? "text-gray-700" : "text-gray-400"}`}
+                className={`flex items-center gap-2 cursor-pointer ${statusFilter === "open" ? "text-gray-700" : "text-gray-400"}`}
               >
                 <span className="inline-block w-2.5 h-2.5 rounded-full border-2 border-gray-400"></span>
                 Em aberto - Estoque
               </button>
               <button
                 onClick={() => setStatusFilter(statusFilter === "paid" ? "all" : "paid")}
-                className={`flex items-center gap-2 ${statusFilter === "paid" ? "text-gray-700" : "text-gray-400"}`}
+                className={`flex items-center gap-2 cursor-pointer ${statusFilter === "paid" ? "text-gray-700" : "text-gray-400"}`}
               >
                 <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span>
                 Pago - Saída
               </button>
               <button
                 onClick={() => setStatusFilter(statusFilter === "cancelled" ? "all" : "cancelled")}
-                className={`flex items-center gap-2 ${statusFilter === "cancelled" ? "text-gray-700" : "text-gray-400"}`}
+                className={`flex items-center gap-2 cursor-pointer ${statusFilter === "cancelled" ? "text-gray-700" : "text-gray-400"}`}
               >
                 <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500"></span>
                 Cancelado
@@ -308,7 +308,7 @@ export default function PedidosDashboard() {
                       className="text-gray-600 hover:text-blue-900 transition-colors"
                       aria-label={`Ver detalhes do pedido ${order.code}`}
                     >
-                      <Eye className="w-5 h-5" />
+                      <Eye className="w-5 h-5 cursor-pointer" />
                     </button>
                   </td>
                 </tr>
