@@ -255,7 +255,7 @@ export default function PedidosDashboard() {
               />
             </div>
             
-            <button className="flex items-center gap-2 bg-[#013C72] text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium">
+            <button className="cursor-pointer flex items-center gap-2 bg-title text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium">
               Cadastrar
               <Plus className="w-5 h-5" />
             </button>
