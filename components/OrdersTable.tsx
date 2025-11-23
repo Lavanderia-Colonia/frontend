@@ -244,13 +244,13 @@ export default function PedidosDashboard() {
 
           <div className="flex items-center gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#012444] w-5 h-5" />
               <input
                 type="text"
                 placeholder="Busque pelo código do pedido"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 w-80 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="pl-10 pr-4 py-2 w-80 border border-neutral/20 rounded-lg hover:outline-none hover:ring-2 hover:ring-title text-neutral"
               />
             </div>
 
