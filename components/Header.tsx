@@ -34,7 +34,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import LogoutModal from "./LogoutModal";
-import { CircleArrowRight } from "lucide-react";
+import SairIcon from "./ui/SairIcon";
 
 export default function Header() {
   const pathname = usePathname();
@@ -78,14 +78,14 @@ export default function Header() {
             />
           </div>
 
-          {/* Navigation */}
           <nav className="flex items-center gap-10 h-8">
             <Link
               href="/orders-table"
               className={`title-default mr-10 relative text-base font-medium transition-colors ${isActive("/orders-table")
-                ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2  after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
-                : "text-[#727376] hover:text-title"
-                }`}
+                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
+                  : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title after:opacity-0 hover:after:opacity-100"
+                }
+              `}
             >
               Pedidos
             </Link>
@@ -93,9 +93,10 @@ export default function Header() {
             <Link
               href="/clients"
               className={`title-default mr-10 relative text-base font-medium transition-colors ${isActive("/clients")
-                ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2  after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
-                : "text-[#727376] hover:text-title"
-                }`}
+                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
+                  : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title after:opacity-0 hover:after:opacity-100"
+                }`
+              }
             >
               Clientes
             </Link>
@@ -103,8 +104,8 @@ export default function Header() {
             <Link
               href="/config"
               className={`title-default mr-10 relative text-base font-medium transition-colors ${isActive("/config")
-                ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2  after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
-                : "text-[#727376] hover:text-title"
+                ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
+                : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title after:opacity-0 hover:after:opacity-100"
                 }`}
             >
               Configurações
@@ -113,24 +114,22 @@ export default function Header() {
         </div>
 
         {/* Botão Sair */}
-        <button
-          onClick={handleLogoutClick}
-          className="group flex items-center gap-2 text-slate-400  hover:text-title transition-colors"
-        >
-          <CircleArrowRight
-            size={20}
-            strokeWidth={1.8}
-            className="transition-colors text-current group-hover:text-title"
-          />
-          <span className="text-default">Sair</span>
-        </button>
+        <div className="flex items-center">
+          <button
+            onClick={handleLogoutClick}
+            className="flex items-center gap-2 title-default hover:text-title transition-colors"
+          >
+            <SairIcon className="w-5 h-5" />
+            <span className="title-default">Sair</span>
+          </button>
+        </div>
       </header>
 
       {/* Modal de Logout */}
       <LogoutModal
         isOpen={showLogoutModal}
         onClose={handleLogoutCancel}
-        onConfirm={handleLogoutConfirm} 
+        onConfirm={handleLogoutConfirm}
       />
     </>
   );
