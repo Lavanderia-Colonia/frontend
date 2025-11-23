@@ -2,13 +2,11 @@
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCaretLeft } from "@fortawesome/free-solid-svg-icons";
+import { faCaretLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import DataInput from "./ui/DataInput";
 import { Search } from "lucide-react";
 import ClientModal from "./SelectClientModal";
-
-<FontAwesomeIcon icon={faCaretLeft} />
 
 interface Cliente {
     id: string;
@@ -17,7 +15,7 @@ interface Cliente {
     endereco: string;
 }
 
-function Etapa1() {
+function Etapa1({ setEtapa }: { setEtapa: (value: number) => void }) {
     const [selected, setSelected] = useState<string>("");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
@@ -113,7 +111,6 @@ function Etapa1() {
                         </button>
                     </div>
                 ) : (
-                    // Apenas o botão se não houver cliente selecionado
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="
@@ -136,6 +133,23 @@ function Etapa1() {
                     onClose={() => setIsModalOpen(false)}
                     onSelectCliente={handleSelectCliente}
                 />
+
+                <div className="flex justify-end">
+                    <button
+                        onClick={() => setEtapa(2)}
+                        className="
+                            font-title text-title
+                            flex py-3 px-4 rounded-[5px]
+                            border-1 border-title
+                            houver:bg-neutral/20
+                            transition-colors
+                            cursor-pointer
+                        "
+                    >
+                        Prosseguir
+                        <FontAwesomeIcon icon={faChevronRight} />
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -149,9 +163,9 @@ function Etapa2() {
     );
 }
 
-function renderEtapa(etapa: number) {
+function renderEtapa(etapa: number, setEtapa: (value: number) => void) {
     switch (etapa) {
-        case 1: return <Etapa1 />;
+        case 1: return <Etapa1 setEtapa={setEtapa} />;
         case 2: return <Etapa2 />;
         default: return null;
     }
@@ -170,7 +184,7 @@ export default function CadastrarPedido() {
                     className="rounded-[30px] bg-white p-4 shadow w-[1800px] min-h-[800px]">
                     <button
                         className="cursor-pointer font-title text-xl text-title flex gap-2 mt-6 font-semibold"
-                        onClick={() => router.push(`/orders-table`)}
+                        onClick={() => router.push(`/pedidos/orders-table`)}
                     >
                         <FontAwesomeIcon icon={faCaretLeft} size="lg" />
                         Cadastrar pedido
@@ -213,7 +227,7 @@ export default function CadastrarPedido() {
                             </div>
 
                             <div className="flex-1">
-                                {renderEtapa(etapa)}
+                                {renderEtapa(etapa, setEtapa)}
                             </div>
 
                         </div>
