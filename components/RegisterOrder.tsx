@@ -141,8 +141,7 @@ function Etapa1({ setEtapa }: { setEtapa: (value: number) => void }) {
                             font-title text-title
                             flex py-3 px-4 rounded-[5px]
                             border-1 border-title
-                            houver:bg-neutral/20
-                            transition-colors
+                            hover:bg-neutral/5 transition-colors
                             cursor-pointer
                         "
                     >
