@@ -19,17 +19,20 @@
 
 @layer utilities {
   .title-default {
-    @apply font-medium leading-none;
+    @apply font-default;
     font-size: 17;
     font-family: var(--font-title);
   }
 }
 
 @theme inline {
-  /* color-text */
+  /* colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-title: #013C72;
+  --color-neutral: #4E4F53;
+  --color-sucess: #2DAC3E;
+  --color-error: #DE3737;
 
   /* font */
   --font-sans: var(--font-geist-sans);
