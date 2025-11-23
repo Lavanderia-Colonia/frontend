@@ -80,8 +80,8 @@ export default function Header() {
 
           <nav className="flex items-center gap-10 h-8">
             <Link
-              href="/orders-table"
-              className={`title-default mr-10 relative text-base font-medium transition-colors ${isActive("/orders-table")
+              href="/pedidos/orders-table"
+              className={`title-default mr-10 relative text-base font-medium transition-colors ${isActive("/pedidos")
                   ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
                   : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title after:opacity-0 hover:after:opacity-100"
                 }

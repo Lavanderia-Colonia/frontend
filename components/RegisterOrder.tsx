@@ -86,7 +86,6 @@ function Etapa1() {
 
                 {clienteSelecionado ? (
                     <div className="space-y-4">
-                        {/* Box com dados do cliente */}
                         <div className="bg-white border border-neutral/20 rounded-lg p-4">
                             <div className="flex flex-col">
                                 <p className="font-default text-neutral mt-2">{clienteSelecionado.nome}</p>
@@ -97,7 +96,6 @@ function Etapa1() {
                             </div>
                         </div>
 
-                        {/* Botão de selecionar cliente */}
                         <button
                             onClick={() => setIsModalOpen(true)}
                             className="
