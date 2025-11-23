@@ -72,7 +72,7 @@
 //             </button>
 //           </div>
 //         </div>
-        
+
 //         <div className="flex items-center gap-3">
 //           <div className="relative">
 //             <input
@@ -199,11 +199,10 @@ export default function PedidosDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "paid" | "cancelled">("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState('pedidos');
 
   const filteredOrders = sample.filter(order => {
     const matchesSearch = order.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         order.client.toLowerCase().includes(searchTerm.toLowerCase());
+      order.client.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -217,7 +216,7 @@ export default function PedidosDashboard() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-6">
             <h1 className="text-3xl font-semibold text-[#013C72]">Pedidos</h1>
-            
+
             <div className="flex items-center gap-4 text-sm">
               <button
                 onClick={() => setStatusFilter(statusFilter === "open" ? "all" : "open")}
@@ -242,7 +241,7 @@ export default function PedidosDashboard() {
               </button>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -254,8 +253,11 @@ export default function PedidosDashboard() {
                 className="pl-10 pr-4 py-2 w-80 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
               />
             </div>
-            
-            <button className="cursor-pointer flex items-center gap-2 bg-title text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors text-sm font-medium">
+
+            <button
+              onClick={() => router.push(`/pedidos/cadastrar`)}
+              className="cursor-pointer flex items-center gap-2 bg-title text-white px-6 py-2 rounded-lg hover:bg-[#012444] transition-colors text-sm font-medium"
+            >
               Cadastrar
               <Plus className="w-5 h-5" />
             </button>
@@ -279,8 +281,8 @@ export default function PedidosDashboard() {
             </thead>
             <tbody>
               {filteredOrders.map((order, index) => (
-                <tr 
-                  key={order.code} 
+                <tr
+                  key={order.code}
                   className={`border-b border-gray-100 ${index % 2 === 1 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 transition-colors`}
                 >
                   <td className="px-6 py-4 text-sm text-gray-400">{order.code}</td>
@@ -304,7 +306,7 @@ export default function PedidosDashboard() {
                   </td>
                   <td className="px-6 py-4">
                     <button
-                      onClick={() => router.push(`/pedidos/${order.code.replace('#','')}`)}
+                      onClick={() => router.push(`/pedidos/${order.code.replace('#', '')}`)}
                       className="text-gray-600 hover:text-blue-900 transition-colors"
                       aria-label={`Ver detalhes do pedido ${order.code}`}
                     >
@@ -320,45 +322,45 @@ export default function PedidosDashboard() {
         {/* Pagination */}
         <div className="flex items-center justify-end gap-4 mt-6">
           <span className="text-sm text-gray-600">Mostrando 10 de 300</span>
-          
+
           <div className="flex items-center gap-2">
-            <button 
+            <button
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               className="p-2 rounded hover:bg-gray-100 transition-colors"
               disabled={currentPage === 1}
             >
               <ChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
-            
-            <button 
+
+            <button
               onClick={() => setCurrentPage(1)}
               className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
             >
               1
             </button>
-            <button 
+            <button
               onClick={() => setCurrentPage(2)}
               className={`px-3 py-1 rounded ${currentPage === 2 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
             >
               2
             </button>
-            <button 
+            <button
               onClick={() => setCurrentPage(3)}
               className={`px-3 py-1 rounded ${currentPage === 3 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
             >
               3
             </button>
-            
+
             <span className="px-2 text-gray-400">...</span>
-            
-            <button 
+
+            <button
               onClick={() => setCurrentPage(30)}
               className={`px-3 py-1 rounded ${currentPage === 30 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
             >
               30
             </button>
-            
-            <button 
+
+            <button
               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
               className="p-2 rounded hover:bg-gray-100 transition-colors"
               disabled={currentPage === totalPages}
