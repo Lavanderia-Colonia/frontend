@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, X, Save } from 'lucide-react';
+import { Search, Save } from 'lucide-react';
 
 interface Cliente {
     id: string;
@@ -97,37 +97,41 @@ export default function ClientModal({ isOpen, onClose, onSelectCliente }: Client
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] flex flex-col">
-                {/* Header */}
-                <div className="p-6 border-b">
+                <div className="p-6">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-2xl font-semibold text-title">Listagem de clientes</h2>
-                        <button
-                            onClick={handleVoltar}
-                            className="text-gray-500 hover:text-gray-700 transition-colors"
-                        >
-                            <X size={24} />
-                        </button>
-                    </div>
-                    <p className="text-gray-600 mb-4">Selecione o cliente:</p>
 
-                    {/* Search */}
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        <input
-                            type="text"
-                            placeholder="Busque pelo nome"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-title"
-                        />
+                        <div className="mt-3 relative">
+                            <Search 
+                                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-title" 
+                                size={18} 
+                            />
+
+                            <input
+                                type="text"
+                                placeholder="Busque pelo nome"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="
+                                    w-full
+                                    pl-10
+                                    pr-4 py-2
+                                    border border-neutral/20
+                                    rounded-lg
+                                    hover:ring-1 hover:ring-title/60
+                                    focus:ring-1 focus:ring-title/60
+                                    outline-none
+                                "
+                            />
+                        </div>
                     </div>
+                    <p className="text-neutral">Selecione o cliente:</p>
                 </div>
 
-                {/* Table */}
-                <div className="flex-1 overflow-auto p-6">
+                <div className="flex-1 overflow-auto mt-3 ml-6 mr-6 mb-6">
                     <div className="overflow-x-auto">
                         <table className="w-full whitespace-nowrap">
-                            <thead className="border-b-2 border-gray-200">
+                            <thead className="border-b-2 border-title">
                                 <tr>
                                     <th className="text-left pb-3 text-title font-semibold pr-16">Nome do Cliente</th>
                                     <th className="text-left pb-3 text-title font-semibold pr-16">Telefone</th>
@@ -145,18 +149,18 @@ export default function ClientModal({ isOpen, onClose, onSelectCliente }: Client
                                                 ? 'bg-blue-100 border-l-4 border-title'
                                                 : index % 2 === 0
                                                     ? 'bg-white hover:bg-title/20'
-                                                    : 'bg-neutral/20 hover:bg-title/20'
+                                                    : 'bg-title/5 hover:bg-title/20'
                                             }
                                         `}
                                     >
-                                        <td className="py-4 pl-2 pr-16 text-gray-700">{cliente.nome}</td>
+                                        <td className="py-4 pl-2 pr-16 text-neutral">{cliente.nome}</td>
                                         <td className="py-4 pr-16 text-neutral">{cliente.telefone}</td>
                                         <td className="py-4 pr-16 text-neutral">{cliente.endereco}</td>
                                     </tr>
                                 ))}
                                 {clientesFiltrados.length === 0 && (
                                     <tr>
-                                        <td colSpan={3} className="py-8 text-center text-gray-500">
+                                        <td colSpan={3} className="py-8 text-center text-neutral">
                                             Nenhum cliente encontrado
                                         </td>
                                     </tr>
