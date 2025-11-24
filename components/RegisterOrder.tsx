@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import Header from "@/components/Header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -7,6 +8,7 @@ import { useRouter } from "next/navigation";
 import DataInput from "./ui/DataInput";
 import { Search } from "lucide-react";
 import ClientModal from "./SelectClientModal";
+import { DropdownCodigoItem } from "./ui/Dropdown";
 
 interface Cliente {
     id: string;
@@ -14,6 +16,14 @@ interface Cliente {
     telefone: string;
     endereco: string;
 }
+
+const itens = [
+    { code: "18927-2" },
+    { code: "28173-9" },
+    { code: "91872-1" },
+    { code: "55012-4" },
+    { code: "77129-6" }
+];
 
 function Etapa1({ setEtapa }: { setEtapa: (value: number) => void }) {
     const [selected, setSelected] = useState<string>("");
@@ -154,10 +164,152 @@ function Etapa1({ setEtapa }: { setEtapa: (value: number) => void }) {
     );
 }
 
-function Etapa2() {
+function Etapa2({ setEtapa }: { setEtapa: (value: number) => void }) {
+
     return (
-        <div>
-            Conteúdo da etapa 2
+        <div className="text-base text-neutral font-default space-y-6">
+
+            <p className="text-neutral font-default">
+                Agora, adicione os itens ao pedido:
+            </p>
+
+            <div className="grid grid-cols-2 gap-6">
+                {/* Código do item */}
+                <div className="flex flex-col gap-2">
+                    <label className="font-default text-neutral">
+                        Código do item <span className="text-red-500">*</span>
+                    </label>
+
+                    <DropdownCodigoItem
+                        items={itens}
+                        filterKey="code"
+                        placeholder="Selecione"
+                    />
+                </div>
+
+                {/* Valor do item */}
+                <div className="flex flex-col gap-2">
+                    <label className="font-default text-neutral">
+                        Valor do item <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="Digite o valor"
+                        className="
+                            w-full border border-neutral/20 rounded-lg 
+                            py-2 px-3 text-sm placeholder-neutral/50 
+                            focus:outline-none focus:ring-2 focus:ring-blue-500
+                        "
+                    />
+                </div>
+
+                {/* Marca */}
+                <div className="flex flex-col gap-2">
+                    <label className="font-default text-neutral">
+                        Marca <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="Digite a marca"
+                        className="
+                            w-full border border-neutral/20 rounded-lg 
+                            py-2 px-3 text-sm placeholder-neutral/50 
+                            focus:outline-none focus:ring-2 focus:ring-blue-500
+                        "
+                    />
+                </div>
+
+                {/* Cor da peça */}
+                <div className="flex flex-col gap-2">
+                    <label className="font-default text-neutral">
+                        Cor da peça <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                        className="
+                            w-full border border-neutral/20 rounded-lg 
+                            py-2 px-3 text-sm text-neutral
+                            focus:outline-none focus:ring-2 focus:ring-blue-500
+                        "
+                    >
+                        <option value="">Selecione</option>
+                    </select>
+                </div>
+
+                {/* Número de peças */}
+                <div className="flex flex-col gap-2">
+                    <label className="font-default text-neutral">
+                        Número de peças
+                    </label>
+                    <input
+                        type="number"
+                        min="0"
+                        defaultValue={0}
+                        className="
+                            w-full border border-neutral/20 rounded-lg 
+                            py-2 px-3 text-sm placeholder-neutral/50
+                            focus:outline-none focus:ring-2 focus:ring-blue-500
+                        "
+                    />
+                </div>
+
+                {/* Preço final */}
+                <div className="flex flex-col gap-2">
+                    <label className="font-default text-neutral">
+                        Preço final
+                    </label>
+                    <input
+                        type="text"
+                        placeholder="-"
+                        disabled
+                        className="
+                            w-full border border-neutral/20 rounded-lg bg-neutral/10
+                            py-2 px-3 text-sm placeholder-neutral/50 text-neutral
+                        "
+                    />
+                </div>
+            </div>
+
+            {/* Observações */}
+            <div className="flex flex-col gap-2">
+                <label className="font-default text-neutral">
+                    Observações (Opcional)
+                </label>
+                <textarea
+                    rows={3}
+                    placeholder="Digite as observações"
+                    className="
+                        w-full border border-neutral/20 rounded-lg 
+                        py-2 px-3 text-sm placeholder-neutral/50 
+                        focus:outline-none focus:ring-2 focus:ring-blue-500
+                    "
+                />
+            </div>
+
+            {/* Botões */}
+            <div className="flex justify-between mt-6">
+
+                <button
+                    onClick={() => setEtapa(1)}
+                    className="
+                        flex items-center gap-2 border border-title 
+                        px-5 py-2 rounded-lg text-title font-default
+                        hover:bg-neutral/10 transition cursor-pointer
+                    "
+                >
+                    <FontAwesomeIcon icon={faCaretLeft} />
+                    Voltar
+                </button>
+
+                <button
+                    className="
+                        flex items-center gap-2 bg-title text-white 
+                        px-5 py-2 rounded-lg font-default
+                        hover:bg-[#012444] transition cursor-pointer
+                    "
+                >
+                    Adicionar +
+                </button>
+            </div>
         </div>
     );
 }
@@ -165,7 +317,7 @@ function Etapa2() {
 function renderEtapa(etapa: number, setEtapa: (value: number) => void) {
     switch (etapa) {
         case 1: return <Etapa1 setEtapa={setEtapa} />;
-        case 2: return <Etapa2 />;
+        case 2: return <Etapa2 setEtapa={setEtapa} />;
         default: return null;
     }
 }
