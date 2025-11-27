@@ -6,16 +6,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import DataInput from "./ui/DataInput";
-import { Search } from "lucide-react";
+import { Search, Clipboard } from "lucide-react";
 import ClientModal from "./SelectClientModal";
 import { DropdownCodigoItem } from "./ui/Dropdown";
-
-interface Cliente {
-    id: string;
-    nome: string;
-    telefone: string;
-    endereco: string;
-}
+import { IPedidos } from "@/models/pedidos";
+import { ResumoPedido } from "./ResumoPedido";
+import { IClientes } from "@/models/clientes";
 
 const itens = [
     { code: "18927-2" },
@@ -25,14 +21,40 @@ const itens = [
     { code: "77129-6" }
 ];
 
-function Etapa1({ setEtapa }: { setEtapa: (value: number) => void }) {
+const colors = [
+    { name: "vermelho" },
+    { name: "azul" },
+    { name: "verde" },
+    { name: "roxo" },
+    { name: "amarelo" },
+    { name: "preto" },
+    { name: "rosa" }
+]
+
+function Etapa1({ setEtapa,
+    pedido,
+    setPedido }: {
+        setEtapa: (value: number) => void;
+        pedido: IPedidos;
+        setPedido: React.Dispatch<React.SetStateAction<IPedidos>>;
+    }) {
     const [selected, setSelected] = useState<string>("");
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null);
 
-    const handleSelectCliente = (cliente: Cliente) => {
-        setClienteSelecionado(cliente);
+    const handleSelectCliente = (cliente: IClientes) => {
+        setPedido(prev => ({
+            ...prev,
+            cliente: cliente
+        }));
         setIsModalOpen(false);
+    };
+
+    const isValid = () => {
+        return (
+            selected &&
+            pedido?.prazo &&
+            pedido?.cliente
+        );
     };
 
     return (
@@ -85,22 +107,30 @@ function Etapa1({ setEtapa }: { setEtapa: (value: number) => void }) {
                     <span className="text-error"> *</span>
                 </p>
 
-                <DataInput />
+                <DataInput
+                    value={pedido.prazo}
+                    onChange={(value) => {
+                        setPedido(prev => ({
+                            ...prev,
+                            prazo: value
+                        }));
+                    }}
+                />
 
                 <p>
                     Cliente
                     <span className="text-error"> *</span>
                 </p>
 
-                {clienteSelecionado ? (
+                {pedido.cliente ? (
                     <div className="space-y-4">
                         <div className="bg-white border border-neutral/20 rounded-lg p-4">
                             <div className="flex flex-col">
-                                <p className="font-default text-neutral mt-2">{clienteSelecionado.nome}</p>
+                                <p className="font-default text-neutral mt-2">{pedido.cliente.nome}</p>
                                 <p className="font-default text-neutral mt-2">Telefone</p>
-                                <p className="text-sm font-default text-neutral/80 mt-2">{clienteSelecionado.telefone}</p>
+                                <p className="text-sm font-default text-neutral/80 mt-2">{pedido.cliente.telefone}</p>
                                 <p className="font-default text-neutral mt-2">Endereço</p>
-                                <p className="text-sm font-default text-neutral/80 mt-2">{clienteSelecionado.endereco}</p>
+                                <p className="text-sm font-default text-neutral/80 mt-2">{pedido.cliente.endereco}</p>
                             </div>
                         </div>
 
@@ -127,14 +157,14 @@ function Etapa1({ setEtapa }: { setEtapa: (value: number) => void }) {
                             w-full bg-title text-white 
                             py-4 px-6 rounded-[10px]
                             flex items-center justify-center gap-3
-                            font-semibold text-base
+                            font-title text-lg
                             hover:bg-[#012444]
                             transition-colors
                             cursor-pointer
                         "
                     >
                         Selecionar cliente
-                        <Search size={20} strokeWidth={2} />
+                        <Search size={22} strokeWidth={2} />
                     </button>
                 )}
 
@@ -146,17 +176,30 @@ function Etapa1({ setEtapa }: { setEtapa: (value: number) => void }) {
 
                 <div className="flex justify-end">
                     <button
-                        onClick={() => setEtapa(2)}
-                        className="
-                            font-title text-title
-                            flex py-3 px-4 rounded-[5px]
-                            border-1 border-title
-                            hover:bg-neutral/5 transition-colors
-                            cursor-pointer
-                        "
+                        onClick={() => {
+                            console.log("isValid: ", !isValid())
+                            if (!isValid()) return;
+                            setEtapa(2);
+                        }}
+                        className={
+                            `
+                                font-title text-title
+                                flex items-center justify-between
+                                py-3 px-4
+                                rounded-IPedidos
+                                border-2 border-title
+                                hover:bg-neutral/5 transition-colors
+                                cursor-pointer
+                                rounded-[10px]
+                                hover:bg-neutral/5
+                            `
+                        }
                     >
-                        Prosseguir
-                        <FontAwesomeIcon icon={faChevronRight} />
+                        <div className="flex-1 text-center">
+                            Prosseguir
+                        </div>
+
+                        <FontAwesomeIcon icon={faChevronRight} className="ml-3" />
                     </button>
                 </div>
             </div>
@@ -164,7 +207,21 @@ function Etapa1({ setEtapa }: { setEtapa: (value: number) => void }) {
     );
 }
 
-function Etapa2({ setEtapa }: { setEtapa: (value: number) => void }) {
+function Etapa2({
+    setEtapa,
+    pedido,
+    setPedido
+}: {
+    setEtapa: (value: number) => void;
+    pedido: IPedidos;
+    setPedido: React.Dispatch<React.SetStateAction<IPedidos>>;
+}) {
+    const [code, setCode] = useState("");
+    const [value, setValue] = useState("");
+    const [brand, setBrand] = useState("");
+    const [color, setColor] = useState("");
+    const [pieces, setPieces] = useState(0);
+    const finalPrice = value && pieces ? Number(value) * Number(pieces) : "-";
 
     return (
         <div className="text-base text-neutral font-default space-y-6">
@@ -174,7 +231,6 @@ function Etapa2({ setEtapa }: { setEtapa: (value: number) => void }) {
             </p>
 
             <div className="grid grid-cols-2 gap-6">
-                {/* Código do item */}
                 <div className="flex flex-col gap-2">
                     <label className="font-default text-neutral">
                         Código do item <span className="text-red-500">*</span>
@@ -184,15 +240,17 @@ function Etapa2({ setEtapa }: { setEtapa: (value: number) => void }) {
                         items={itens}
                         filterKey="code"
                         placeholder="Selecione"
+                        onClickPlaceholder="|Selecione ou pesquise"
+                        onSelect={(value, item) => setCode(item.code)}
                     />
                 </div>
 
-                {/* Valor do item */}
                 <div className="flex flex-col gap-2">
                     <label className="font-default text-neutral">
                         Valor do item <span className="text-red-500">*</span>
                     </label>
                     <input
+                        onChange={(value) => setValue(value.target.value)}
                         type="text"
                         placeholder="Digite o valor"
                         className="
@@ -203,12 +261,12 @@ function Etapa2({ setEtapa }: { setEtapa: (value: number) => void }) {
                     />
                 </div>
 
-                {/* Marca */}
                 <div className="flex flex-col gap-2">
-                    <label className="font-default text-neutral">
+                    <label className="font-default text-neutral"                    >
                         Marca <span className="text-red-500">*</span>
                     </label>
                     <input
+                        onChange={(value) => setBrand(value.target.value)}
                         type="text"
                         placeholder="Digite a marca"
                         className="
@@ -219,28 +277,26 @@ function Etapa2({ setEtapa }: { setEtapa: (value: number) => void }) {
                     />
                 </div>
 
-                {/* Cor da peça */}
                 <div className="flex flex-col gap-2">
                     <label className="font-default text-neutral">
                         Cor da peça <span className="text-red-500">*</span>
                     </label>
-                    <select
-                        className="
-                            w-full border border-neutral/20 rounded-lg 
-                            py-2 px-3 text-sm text-neutral
-                            focus:outline-none focus:ring-2 focus:ring-blue-500
-                        "
-                    >
-                        <option value="">Selecione</option>
-                    </select>
+
+                    <DropdownCodigoItem
+                        items={colors}
+                        filterKey="name"
+                        placeholder="Selecione"
+                        onClickPlaceholder="|Selecione ou pesquise"
+                        onSelect={(value, item) => setColor(item.name)}
+                    />
                 </div>
 
-                {/* Número de peças */}
                 <div className="flex flex-col gap-2">
                     <label className="font-default text-neutral">
                         Número de peças
                     </label>
                     <input
+                        onChange={(value) => setPieces(Number(value.target.value))}
                         type="number"
                         min="0"
                         defaultValue={0}
@@ -252,14 +308,13 @@ function Etapa2({ setEtapa }: { setEtapa: (value: number) => void }) {
                     />
                 </div>
 
-                {/* Preço final */}
                 <div className="flex flex-col gap-2">
                     <label className="font-default text-neutral">
                         Preço final
                     </label>
                     <input
                         type="text"
-                        placeholder="-"
+                        value={finalPrice}
                         disabled
                         className="
                             w-full border border-neutral/20 rounded-lg bg-neutral/10
@@ -269,7 +324,6 @@ function Etapa2({ setEtapa }: { setEtapa: (value: number) => void }) {
                 </div>
             </div>
 
-            {/* Observações */}
             <div className="flex flex-col gap-2">
                 <label className="font-default text-neutral">
                     Observações (Opcional)
@@ -285,7 +339,6 @@ function Etapa2({ setEtapa }: { setEtapa: (value: number) => void }) {
                 />
             </div>
 
-            {/* Botões */}
             <div className="flex justify-between mt-6">
 
                 <button
@@ -301,10 +354,24 @@ function Etapa2({ setEtapa }: { setEtapa: (value: number) => void }) {
                 </button>
 
                 <button
+                    onClick={() => {
+                        const novoItem = {
+                            code,
+                            value,
+                            brand,
+                            color,
+                            pieces
+                        };
+
+                        setPedido(prev => ({
+                            ...prev,
+                            products: [...prev.products, novoItem]
+                        }));
+                    }}
                     className="
                         flex items-center gap-2 bg-title text-white 
-                        px-5 py-2 rounded-lg font-default
-                        hover:bg-[#012444] transition cursor-pointer
+                I      s  px-5 py-2 rounded-lg font-default
+                        hover:bg-[#012444] transition cIursor-spointer
                     "
                 >
                     Adicionar +
@@ -314,15 +381,25 @@ function Etapa2({ setEtapa }: { setEtapa: (value: number) => void }) {
     );
 }
 
-function renderEtapa(etapa: number, setEtapa: (value: number) => void) {
+function renderEtapa(
+    etapa: number,
+    setEtapa: (value: number) => void,
+    pedido: IPedidos,
+    setPedido: React.Dispatch<React.SetStateAction<IPedidos>>
+) {
     switch (etapa) {
-        case 1: return <Etapa1 setEtapa={setEtapa} />;
-        case 2: return <Etapa2 setEtapa={setEtapa} />;
+        case 1: return <Etapa1 setEtapa={setEtapa} pedido={pedido} setPedido={setPedido} />;
+        case 2: return <Etapa2 setEtapa={setEtapa} pedido={pedido} setPedido={setPedido} />;
         default: return null;
     }
 }
 
-export default function CadastrarPedido() {
+interface PedidoProps {
+    pedido: IPedidos;
+    setPedido: React.Dispatch<React.SetStateAction<IPedidos>>
+}
+
+export default function CadastrarPedido({ pedido, setPedido }: PedidoProps) {
     const router = useRouter();
     const [etapa, setEtapa] = useState(1);
 
@@ -343,13 +420,7 @@ export default function CadastrarPedido() {
 
                     <div className="mt-10 flex gap-6 flex-1">
 
-                        <div className="flex-1 border border-gray-200 rounded-2xl p-6 flex flex-col min-h-[670px]">
-                            <h2 className="font-title text-base text-title font-semibold mb-4">Resumo do pedido</h2>
-
-                            <div className="flex-1 flex justify-center items-center text-gray-400">
-                                Adicione itens ao pedido
-                            </div>
-                        </div>
+                        <ResumoPedido pedido={pedido} />
 
                         <div className="flex-1 border border-gray-200 rounded-2xl p-6 flex flex-col min-h-[670px]">
                             <div className="flex mb-8">
@@ -378,7 +449,7 @@ export default function CadastrarPedido() {
                             </div>
 
                             <div className="flex-1">
-                                {renderEtapa(etapa, setEtapa)}
+                                {renderEtapa(etapa, setEtapa, pedido, setPedido)}
                             </div>
 
                         </div>
