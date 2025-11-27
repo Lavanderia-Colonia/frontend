@@ -8,6 +8,7 @@ interface DropdownProps<T> {
     filterKey: keyof T;
     displayKey?: keyof T;
     placeholder?: string;
+    onClickPlaceholder?: string;
     onSelect?: (value: string, item: T) => void;
 }
 
@@ -16,6 +17,7 @@ export function DropdownCodigoItem<T>({
     filterKey,
     displayKey,
     placeholder = "Selecione",
+    onClickPlaceholder,
     onSelect
 }: DropdownProps<T>) {
 
@@ -49,17 +51,10 @@ export function DropdownCodigoItem<T>({
         return () => document.removeEventListener("mousedown", handler);
     }, [isOpen]);
 
-
     return (
         <div className="relative w-full" ref={containerRef}>
 
-            <div
-                className={`
-                    border border-neutral/20 rounded-lg bg-white 
-                    transition-all duration-200 ease-in-out overflow-hidden
-                    ${isOpen ? "max-h-64" : "max-h-10"}
-                `}
-            >
+            <div className="border border-neutral/20 rounded-lg bg-white transition-all duration-200 ease-in-out">
 
                 <div className="relative">
                     <input
@@ -67,7 +62,7 @@ export function DropdownCodigoItem<T>({
                         value={isOpen ? search : selected}
                         onChange={(e) => setSearch(e.target.value)}
                         onClick={() => setIsOpen(true)}
-                        placeholder={placeholder}
+                        placeholder={isOpen ? onClickPlaceholder : placeholder}
                         className="
                             w-full py-2 pl-3 pr-10 text-sm text-neutral
                             focus:outline-none
@@ -84,30 +79,32 @@ export function DropdownCodigoItem<T>({
                     />
                 </div>
 
-                {isOpen && (
-                    <div className="max-h-40 overflow-auto border-t border-neutral/10">
+                <div
+                    className={`
+                        overflow-hidden border-neutral/10
+                        transition-[max-height] duration-300 ease-in-out
+                        ${isOpen ? "max-h-40" : "max-h-0"}
+                    `}
+                >
+                    {filteredItems.length === 0 && (
+                        <p className="p-2 text-sm text-neutral/50">
+                            Nenhum item encontrado
+                        </p>
+                    )}
 
-                        {filteredItems.length === 0 && (
-                            <p className="p-2 text-sm text-neutral/50">
-                                Nenhum item encontrado
-                            </p>
-                        )}
-
-                        {filteredItems.map((item, index) => (
-                            <div
-                                key={index}
-                                onClick={() => handleSelect(item)}
-                                className="
-                                    px-3 py-2 text-sm text-neutral cursor-pointer 
-                                    hover:bg-neutral/10
-                                "
-                            >
-                                {String(item[usedDisplay])}
-                            </div>
-                        ))}
-
-                    </div>
-                )}
+                    {filteredItems.map((item, index) => (
+                        <div
+                            key={index}
+                            onClick={() => handleSelect(item)}
+                            className="
+                                px-3 py-2 text-sm text-neutral cursor-pointer 
+                                hover:bg-neutral/10
+                            "
+                        >
+                            {String(item[usedDisplay])}
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
