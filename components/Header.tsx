@@ -117,7 +117,7 @@ export default function Header() {
         <div className="flex items-center">
           <button
             onClick={handleLogoutClick}
-            className="flex items-center gap-2 title-default hover:text-title transition-colors"
+            className="flex items-center gap-2 title-default text-neutral/60 hover:text-title transition-colors"
           >
             <SairIcon className="w-5 h-5" />
             <span className="title-default">Sair</span>
