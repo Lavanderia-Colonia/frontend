@@ -6,12 +6,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/navigation";
 import DataInput from "./ui/DataInput";
-import { Search, Clipboard } from "lucide-react";
+import { Search } from "lucide-react";
 import ClientModal from "./SelectClientModal";
 import { DropdownCodigoItem } from "./ui/Dropdown";
 import { IPedidos } from "@/models/pedidos";
 import { ResumoPedido } from "./ResumoPedido";
 import { IClientes } from "@/models/clientes";
+import { IProdutos } from "@/models/produtos";
 
 const itens = [
     { code: "18927-2" },
@@ -44,6 +45,7 @@ function Etapa1({ setEtapa,
     const handleSelectCliente = (cliente: IClientes) => {
         setPedido(prev => ({
             ...prev,
+            tipoFinalizacao: selected,
             cliente: cliente
         }));
         setIsModalOpen(false);
@@ -177,7 +179,6 @@ function Etapa1({ setEtapa,
                 <div className="flex justify-end">
                     <button
                         onClick={() => {
-                            console.log("isValid: ", !isValid())
                             if (!isValid()) return;
                             setEtapa(2);
                         }}
@@ -217,11 +218,32 @@ function Etapa2({
     setPedido: React.Dispatch<React.SetStateAction<IPedidos>>;
 }) {
     const [code, setCode] = useState("");
-    const [value, setValue] = useState("");
+    const [displayValue, setDisplayValue] = useState("0,00");
+    const [value, setValue] = useState(0);
     const [brand, setBrand] = useState("");
     const [color, setColor] = useState("");
     const [pieces, setPieces] = useState(0);
     const finalPrice = value && pieces ? Number(value) * Number(pieces) : "-";
+
+    const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let v = e.target.value;
+
+        v = v.replace(/\D/g, "");
+
+        if (!v) {
+            setDisplayValue("0,00");
+            setValue(0);
+            return;
+        }
+
+        const num = Number(v) / 100;
+
+        setValue(num);
+        const formatted = num.toFixed(2).replace(".", ",");
+
+        setDisplayValue(formatted);
+    };
+
 
     return (
         <div className="text-base text-neutral font-default space-y-6">
@@ -240,7 +262,7 @@ function Etapa2({
                         items={itens}
                         filterKey="code"
                         placeholder="Selecione"
-                        onClickPlaceholder="|Selecione ou pesquise"
+                        onClickPlaceholder={code ?? "|Selecione ou pesquise"}
                         onSelect={(value, item) => setCode(item.code)}
                     />
                 </div>
@@ -250,13 +272,20 @@ function Etapa2({
                         Valor do item <span className="text-red-500">*</span>
                     </label>
                     <input
-                        onChange={(value) => setValue(value.target.value)}
+                        value={displayValue}
+                        onChange={handleValueChange}
                         type="text"
                         placeholder="Digite o valor"
+                        onBlur={(e) => {
+                            const num = Number(e.target.value.replace(",", "."));
+                            if (!isNaN(num)) {
+                                setValue(Number(num.toFixed(2)));
+                            }
+                        }}
                         className="
                             w-full border border-neutral/20 rounded-lg 
                             py-2 px-3 text-sm placeholder-neutral/50 
-                            focus:outline-none focus:ring-2 focus:ring-blue-500
+                            focus:outline-none focus:ring-1 focus:ring-title
                         "
                     />
                 </div>
@@ -272,7 +301,7 @@ function Etapa2({
                         className="
                             w-full border border-neutral/20 rounded-lg 
                             py-2 px-3 text-sm placeholder-neutral/50 
-                            focus:outline-none focus:ring-2 focus:ring-blue-500
+                            focus:outline-none focus:ring-1 focus:ring-title
                         "
                     />
                 </div>
@@ -303,7 +332,7 @@ function Etapa2({
                         className="
                             w-full border border-neutral/20 rounded-lg 
                             py-2 px-3 text-sm placeholder-neutral/50
-                            focus:outline-none focus:ring-2 focus:ring-blue-500
+                            focus:outline-none focus:ring-0 focus:border-neutral/20
                         "
                     />
                 </div>
@@ -317,7 +346,7 @@ function Etapa2({
                         value={finalPrice}
                         disabled
                         className="
-                            w-full border border-neutral/20 rounded-lg bg-neutral/10
+                            w-full border border-neutral/20 rounded-lg
                             py-2 px-3 text-sm placeholder-neutral/50 text-neutral
                         "
                     />
@@ -329,22 +358,23 @@ function Etapa2({
                     Observações (Opcional)
                 </label>
                 <textarea
-                    rows={3}
+                    rows={5}
                     placeholder="Digite as observações"
                     className="
                         w-full border border-neutral/20 rounded-lg 
                         py-2 px-3 text-sm placeholder-neutral/50 
-                        focus:outline-none focus:ring-2 focus:ring-blue-500
+                        focus:outline-none focus:ring-1 focus:ring-title
+                        resize-none
                     "
                 />
             </div>
 
-            <div className="flex justify-between mt-6">
+            <div className="flex w-full justify-end gap-3 mt-6">
 
                 <button
                     onClick={() => setEtapa(1)}
                     className="
-                        flex items-center gap-2 border border-title 
+                        flex items-center gap-2 border border-title
                         px-5 py-2 rounded-lg text-title font-default
                         hover:bg-neutral/10 transition cursor-pointer
                     "
@@ -355,7 +385,7 @@ function Etapa2({
 
                 <button
                     onClick={() => {
-                        const novoItem = {
+                        const novoItem: IProdutos = {
                             code,
                             value,
                             brand,
@@ -369,9 +399,9 @@ function Etapa2({
                         }));
                     }}
                     className="
-                        flex items-center gap-2 bg-title text-white 
-                I      s  px-5 py-2 rounded-lg font-default
-                        hover:bg-[#012444] transition cIursor-spointer
+                        flex items-center gap-2 text-title border border-title
+                        px-5 py-2 rounded-lg font-default
+                        hover:bg-neutral/10 transition cursor-pointer
                     "
                 >
                     Adicionar +
@@ -422,7 +452,7 @@ export default function CadastrarPedido({ pedido, setPedido }: PedidoProps) {
 
                         <ResumoPedido pedido={pedido} />
 
-                        <div className="flex-1 border border-gray-200 rounded-2xl p-6 flex flex-col min-h-[670px]">
+                        <div className="flex-1 border border-neutral/20 rounded-2xl p-6 flex flex-col min-h-[670px]">
                             <div className="flex mb-8">
                                 <div className="flex items-center gap-4">
 
