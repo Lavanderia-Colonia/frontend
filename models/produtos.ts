@@ -1,6 +1,6 @@
 export interface IProdutos {
     code: string;
-    value: string;
+    value: number;
     brand: string;
     color: string;
     pieces: number;
