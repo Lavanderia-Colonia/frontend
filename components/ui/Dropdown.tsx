@@ -54,14 +54,16 @@ export function DropdownCodigoItem<T>({
     return (
         <div className="relative w-full" ref={containerRef}>
 
-            <div className="border border-neutral/20 rounded-lg bg-white transition-all duration-200 ease-in-out">
+            <div className={`
+                border border-neutral/20 bg-white
+                ${isOpen ? "rounded-t-lg rounded-b-none" : "delay-300 rounded-lg"}
+            `}>
 
                 <div className="relative">
                     <input
-                        autoFocus={isOpen}
                         value={isOpen ? search : selected}
                         onChange={(e) => setSearch(e.target.value)}
-                        onClick={() => setIsOpen(true)}
+                        onClick={() => setIsOpen(prev => !prev)}
                         placeholder={isOpen ? onClickPlaceholder : placeholder}
                         className="
                             w-full py-2 pl-3 pr-10 text-sm text-neutral
@@ -80,30 +82,36 @@ export function DropdownCodigoItem<T>({
                 </div>
 
                 <div
-                    className={`
-                        overflow-hidden border-neutral/10
-                        transition-[max-height] duration-300 ease-in-out
-                        ${isOpen ? "max-h-40" : "max-h-0"}
+                    className={`    
+                        overflow-hidden
+                        transition-[max-height] duration-300 ease-in-out 
+                        absolute left-0 right-0 z-20
+                        ${isOpen
+                            ? "max-h-40 bg-white border border-neutral/20 border-t-0 rounded-b-lg"
+                            : "max-h-0"
+                        }
                     `}
                 >
-                    {filteredItems.length === 0 && (
-                        <p className="p-2 text-sm text-neutral/50">
-                            Nenhum item encontrado
-                        </p>
-                    )}
+                    <div className="max-h-40 overflow-y-auto">
+                        {filteredItems.length === 0 && (
+                            <p className="p-2 text-sm text-neutral/50">
+                                Nenhum item encontrado
+                            </p>
+                        )}
 
-                    {filteredItems.map((item, index) => (
-                        <div
-                            key={index}
-                            onClick={() => handleSelect(item)}
-                            className="
+                        {filteredItems.map((item, index) => (
+                            <div
+                                key={index}
+                                onClick={() => handleSelect(item)}
+                                className="
                                 px-3 py-2 text-sm text-neutral cursor-pointer 
                                 hover:bg-neutral/10
                             "
-                        >
-                            {String(item[usedDisplay])}
-                        </div>
-                    ))}
+                            >
+                                {String(item[usedDisplay])}
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         </div>
