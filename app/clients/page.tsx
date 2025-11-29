@@ -59,7 +59,10 @@ export default function ClientesDashboard() {
               />
             </div>
             
-            <button className="flex items-center gap-2 bg-blue-900 text-white px-6 py-2 rounded-lg hover:bg-blue-800 transition-colors">
+            <button 
+              onClick={() => router.push('/clients/cadastrar')}
+              className="flex items-center gap-2 bg-title text-white px-6 py-2 rounded-lg hover:bg-[#012444] transition-colors"
+            >
               Adicionar
               <Plus className="w-5 h-5" />
             </button>
