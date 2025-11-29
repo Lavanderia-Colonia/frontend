@@ -39,7 +39,7 @@ function Etapa1({ setEtapa,
         pedido: IPedidos;
         setPedido: React.Dispatch<React.SetStateAction<IPedidos>>;
     }) {
-    const [selected, setSelected] = useState<string>("");
+    const [selected, setSelected] = useState<string>(pedido ? pedido.tipoFinalizacao : "");
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleSelectCliente = (cliente: IClientes) => {
@@ -70,7 +70,14 @@ function Etapa1({ setEtapa,
 
                 <div className="flex items-center gap-6">
                     <button
-                        onClick={() => setSelected(selected === "entrega" ? "" : "entrega")}
+                        onClick={() => {
+                            const value = selected === "entrega" ? "" : "entrega";
+                            setSelected(value);
+                            setPedido(prev => ({
+                                ...prev,
+                                tipoFinalizacao: value
+                            }));
+                        }}
                         className="flex items-center gap-2"
                     >
                         <span
@@ -79,7 +86,7 @@ function Etapa1({ setEtapa,
                                 transition-all cursor-pointer
                                 ${selected === "entrega"
                                     ? "border-[3px] border-sucess"
-                                    : "border-[1px] border-neutral/40"
+                                    : "border-px border-neutral/40"
                                 }
                             `}
                         />
@@ -87,7 +94,14 @@ function Etapa1({ setEtapa,
                     </button>
 
                     <button
-                        onClick={() => setSelected(selected === "retirada" ? "" : "retirada")}
+                        onClick={() => {
+                            const value = selected === "retirada" ? "" : "retirada"
+                            setSelected(value);
+                            setPedido(prev => ({
+                                ...prev,
+                                tipoFinalizacao: value
+                            }));
+                        }}
                         className="flex items-center gap-2"
                     >
                         <span
@@ -96,7 +110,7 @@ function Etapa1({ setEtapa,
                                 transition-all cursor-pointer
                                 ${selected === "retirada"
                                     ? "border-[3px] border-sucess"
-                                    : "border-[1px] border-neutral/40"
+                                    : "border-px border-neutral/40"
                                 }
                             `}
                         />
@@ -204,7 +218,7 @@ function Etapa1({ setEtapa,
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
