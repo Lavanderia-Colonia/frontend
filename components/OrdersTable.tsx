@@ -269,14 +269,14 @@ export default function PedidosDashboard() {
           <table className="w-full">
             <thead className="bg-white border-b border-gray-200">
               <tr>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-blue-900">Código</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-blue-900">Nome do Cliente</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-blue-900">Peças</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-blue-900">Lançamento</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-blue-900">Finalização</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-blue-900">Valor Total</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-blue-900">Status</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-blue-900">Ações</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-title">Código</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-title">Nome do Cliente</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-title">Peças</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-title">Lançamento</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-title">Finalização</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-title">Valor Total</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-title">Status</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-title">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -307,7 +307,7 @@ export default function PedidosDashboard() {
                   <td className="px-6 py-4">
                     <button
                       onClick={() => router.push(`/pedidos/${order.code.replace('#', '')}`)}
-                      className="text-gray-600 hover:text-blue-900 transition-colors"
+                      className="text-gray-600 hover:text-tile transition-colors"
                       aria-label={`Ver detalhes do pedido ${order.code}`}
                     >
                       <Eye className="w-5 h-5 cursor-pointer" />
