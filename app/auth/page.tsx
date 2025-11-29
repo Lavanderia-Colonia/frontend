@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import logoLogin from "../../public/logo_login.svg";
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,10 +38,10 @@ export default function LoginPage() {
               className="w-full border border-neutral-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-title text-default text-neutral/60"
             />
             <span
-              className="absolute right-3 top-2 cursor-pointer select-none text-title"
+              className="absolute right-3 top-3 cursor-pointer select-none text-title"
               onClick={() => setShowPassword(!showPassword)}
             >
-              
+              {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </span>
           </div>
         </div>
