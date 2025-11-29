@@ -1,14 +1,13 @@
-import React from "react";
-import Header from "../components/Header";
-import OrdersTable from "../components/OrdersTable";
+"use client";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className="min-h-screen bg-slate-100">
-      <Header />
-      <main className="mx-auto max-w-7xl p-6">
-        <OrdersTable />
-      </main>
-    </div>
-  );
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push("/auth");
+  }, [router]);
+
+  return null;
 }
