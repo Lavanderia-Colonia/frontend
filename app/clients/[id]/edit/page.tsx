@@ -3,7 +3,9 @@
 "use client";
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ArrowLeft, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCaretLeft } from "@fortawesome/free-solid-svg-icons";
 import Header from "@/components/Header";
 import ConfirmationModal from "@/components/ConfirmationModal";
 
@@ -97,43 +99,44 @@ export default function ClientEdit() {
         <Header />
         
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header com botão voltar e título */}
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleBackClick}
-                className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
-              >
-                <ArrowLeft size={20} />
-              </button>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Editar cliente - {formData.nomeCompleto}
-              </h1>
+          {/* Card de edição */}
+          <div className="bg-white rounded-3xl shadow p-8">
+            {/* Header com botão voltar e título */}
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center">
+                <button
+                  onClick={handleBackClick}
+                  className="text-title hover:text-[#012444] flex items-center mr-1"
+                >
+                  <FontAwesomeIcon icon={faCaretLeft} size="lg" />
+                </button>
+                <h1 className="text-2xl font-bold text-title">
+                  Editar cliente - {formData.nomeCompleto}
+                </h1>
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCancelClick}
+                  className="px-6 py-2 border border-title rounded-lg hover:bg-title/10 text-title font-semibold transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="flex items-center gap-2 px-6 py-2 bg-title text-white rounded-lg hover:bg-[#012444] font-semibold transition-colors"
+                >
+                  <Save size={18} />
+                  Salvar
+                </button>
+              </div>
             </div>
-            
-            <div className="flex gap-3">
-              <button
-                onClick={handleCancelClick}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSave}
-                className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Save size={18} />
-                Salvar
-              </button>
-            </div>
-          </div>
 
-          {/* Formulário de edição */}
-          <div className="bg-white rounded-lg shadow p-8">
+            {/* Formulário de edição */}
             <div className="grid grid-cols-2 gap-x-8 gap-y-6">
               {/* Nome completo */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="flex flex-col gap-2">
+                <label className="font-default text-neutral">
                   Nome completo
                 </label>
                 <input
@@ -142,13 +145,17 @@ export default function ClientEdit() {
                   value={formData.nomeCompleto}
                   onChange={handleChange}
                   placeholder="Digite o nome"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="
+                    w-full border border-neutral/20 rounded-lg 
+                    py-2 px-3 text-sm text-neutral placeholder-neutral/50 
+                    focus:outline-none focus:ring-1 focus:ring-title
+                  "
                 />
               </div>
 
               {/* Telefone */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="flex flex-col gap-2">
+                <label className="font-default text-neutral">
                   Telefone
                 </label>
                 <input
@@ -157,13 +164,17 @@ export default function ClientEdit() {
                   value={formData.telefone}
                   onChange={handleChange}
                   placeholder="(00) 00000-0000"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="
+                    w-full border border-neutral/20 rounded-lg 
+                    py-2 px-3 text-sm text-neutral placeholder-neutral/50 
+                    focus:outline-none focus:ring-1 focus:ring-title
+                  "
                 />
               </div>
 
               {/* Logradouro */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="flex flex-col gap-2">
+                <label className="font-default text-neutral">
                   Logradouro
                 </label>
                 <input
@@ -172,13 +183,17 @@ export default function ClientEdit() {
                   value={formData.logradouro}
                   onChange={handleChange}
                   placeholder="Digite o logradouro"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="
+                    w-full border border-neutral/20 rounded-lg 
+                    py-2 px-3 text-sm text-neutral placeholder-neutral/50 
+                    focus:outline-none focus:ring-1 focus:ring-title
+                  "
                 />
               </div>
 
               {/* Número */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="flex flex-col gap-2">
+                <label className="font-default text-neutral">
                   Número
                 </label>
                 <input
@@ -187,13 +202,17 @@ export default function ClientEdit() {
                   value={formData.numero}
                   onChange={handleChange}
                   placeholder="Digite o número"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="
+                    w-full border border-neutral/20 rounded-lg 
+                    py-2 px-3 text-sm text-neutral placeholder-neutral/50 
+                    focus:outline-none focus:ring-1 focus:ring-title
+                  "
                 />
               </div>
 
               {/* Bairro */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="flex flex-col gap-2">
+                <label className="font-default text-neutral">
                   Bairro
                 </label>
                 <input
@@ -202,13 +221,17 @@ export default function ClientEdit() {
                   value={formData.bairro}
                   onChange={handleChange}
                   placeholder="Digite o bairro"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="
+                    w-full border border-neutral/20 rounded-lg 
+                    py-2 px-3 text-sm text-neutral placeholder-neutral/50 
+                    focus:outline-none focus:ring-1 focus:ring-title
+                  "
                 />
               </div>
 
               {/* CEP */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="flex flex-col gap-2">
+                <label className="font-default text-neutral">
                   CEP
                 </label>
                 <input
@@ -217,13 +240,17 @@ export default function ClientEdit() {
                   value={formData.cep}
                   onChange={handleChange}
                   placeholder="00000-000"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="
+                    w-full border border-neutral/20 rounded-lg 
+                    py-2 px-3 text-sm text-neutral placeholder-neutral/50 
+                    focus:outline-none focus:ring-1 focus:ring-title
+                  "
                 />
               </div>
 
               {/* Complemento */}
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="col-span-2 flex flex-col gap-2">
+                <label className="font-default text-neutral">
                   Complemento
                 </label>
                 <input
@@ -232,7 +259,11 @@ export default function ClientEdit() {
                   value={formData.complemento}
                   onChange={handleChange}
                   placeholder="Digite o complemento"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="
+                    w-full border border-neutral/20 rounded-lg 
+                    py-2 px-3 text-sm text-neutral placeholder-neutral/50 
+                    focus:outline-none focus:ring-1 focus:ring-title
+                  "
                 />
               </div>
             </div>
