@@ -7,6 +7,7 @@ import { faCaretLeft } from "@fortawesome/free-solid-svg-icons";
 import Header from "@/components/Header";
 import ConfirmationModal from "@/components/ConfirmationModal";
 import SuccessModal from "@/components/SuccessModal";
+import { createClient } from "@/services/clientService";
 
 export default function CadastrarCliente() {
   const router = useRouter();
@@ -30,14 +31,13 @@ export default function CadastrarCliente() {
     message: "",
     confirmText: "",
     cancelText: "",
-    onConfirm: () => {}
+    onConfirm: () => { }
   });
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
-  // Função para formatar telefone dinamicamente enquanto o usuário digita
-  // Suporta tanto (XX) XXXX-XXXX quanto (XX) XXXXX-XXXX
   const formatTelefone = (value: string) => {
-    let numbers = value.replace(/\D/g, "").slice(0, 11); // limita a 11 dígitos
+    const numbers = value.replace(/\D/g, "").slice(0, 11);
+
 
     if (numbers.length === 0) return "";
 
@@ -47,38 +47,31 @@ export default function CadastrarCliente() {
     }
 
     const ddd = numbers.slice(0, 2);
-    let restante = numbers.slice(2);
+    const restante = numbers.slice(2);
 
-    // Telefones fixos (até 10 dígitos no total => 8 no restante)
     if (numbers.length <= 10) {
       if (restante.length <= 4) {
-        // ainda sem traço
         return `(${ddd}) ${restante}`;
       }
 
-      // 4 + até 4
       return `(${ddd}) ${restante.slice(0, 4)}-${restante.slice(4)}`;
     }
 
-    // Celulares (11 dígitos => 9 no restante)
     if (restante.length <= 5) {
-      // ainda sem traço
       return `(${ddd}) ${restante}`;
     }
 
-    // 5 + até 4
     return `(${ddd}) ${restante.slice(0, 5)}-${restante.slice(5)}`;
   };
 
-  // Função para formatar CEP no padrão 00000-000 enquanto digita
   const formatCEP = (value: string) => {
-    const numbers = value.replace(/\D/g, "").slice(0, 8); // limita a 8 dígitos
+    const numbers = value.replace(/\D/g, "").slice(0, 8);
     return numbers.replace(/(\d{5})(\d{0,3})/, "$1-$2").replace(/-$/, "");
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     if (name === 'telefone') {
       setFormData(prev => ({
         ...prev,
@@ -98,11 +91,9 @@ export default function CadastrarCliente() {
   };
 
   const handleBackClick = () => {
-    // Verifica se há dados preenchidos
     const hasData = Object.values(formData).some(value => value.trim() !== '');
-    
+
     if (hasData) {
-      // Mostra modal de confirmação antes de descartar
       setModalConfig({
         isOpen: true,
         type: "danger",
@@ -121,8 +112,6 @@ export default function CadastrarCliente() {
   };
 
   const handleCancelClick = () => {
-    // Sempre mostra a modal de descarte ao clicar em Cancelar,
-    // independentemente de haver dados preenchidos ou não
     setModalConfig({
       isOpen: true,
       type: "danger",
@@ -152,7 +141,7 @@ export default function CadastrarCliente() {
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!validateForm()) {
       setModalConfig({
         isOpen: true,
@@ -168,16 +157,39 @@ export default function CadastrarCliente() {
       return;
     }
 
-    // Aqui você implementaria a lógica de salvamento real (API, etc.)
-    console.log('Salvando dados:', formData);
+    try {
+      const telefoneLimpo = formData.telefone.replace(/\D/g, '');
+      const cepLimpo = formData.cep.replace(/\D/g, '');
 
-    // Garante que qualquer modal anterior esteja fechado
-    closeModal();
+      const clientData = {
+        name: formData.nomeCompleto,
+        telephone: telefoneLimpo,
+        street: formData.logradouro,
+        number: formData.numero,
+        district: formData.bairro,
+        zipCode: cepLimpo,
+        complement: formData.complemento || '',
+      };
 
-    // Simula processamento e abre o modal de sucesso
-    setTimeout(() => {
+      await createClient(clientData);
+
+      closeModal();
+
       setIsSuccessModalOpen(true);
-    }, 300);
+    } catch (error) {
+      closeModal();
+      setModalConfig({
+        isOpen: true,
+        type: "danger",
+        title: "Erro ao salvar",
+        message: error instanceof Error ? error.message : "Ocorreu um erro ao cadastrar o cliente. Tente novamente.",
+        confirmText: "OK",
+        cancelText: "Fechar",
+        onConfirm: () => {
+          closeModal();
+        }
+      });
+    }
   };
 
   const closeModal = () => {
@@ -190,11 +202,9 @@ export default function CadastrarCliente() {
     <>
       <div className="min-h-screen bg-slate-100">
         <Header />
-        
+
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Formulário de cadastro */}
           <div className="bg-white rounded-3xl shadow p-8">
-            {/* Header com botão voltar e título */}
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center">
                 <button
@@ -207,7 +217,7 @@ export default function CadastrarCliente() {
                   Cadastrar cliente
                 </h1>
               </div>
-              
+
               <div className="flex gap-3">
                 <button
                   onClick={handleCancelClick}
@@ -231,7 +241,6 @@ export default function CadastrarCliente() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-              {/* Nome completo */}
               <div className="flex flex-col gap-2">
                 <label className="font-default text-neutral">
                   Nome completo <span className="text-red-500">*</span>
@@ -250,7 +259,6 @@ export default function CadastrarCliente() {
                 />
               </div>
 
-              {/* Telefone */}
               <div className="flex flex-col gap-2">
                 <label className="font-default text-neutral">
                   Telefone <span className="text-red-500">*</span>
@@ -270,7 +278,6 @@ export default function CadastrarCliente() {
                 />
               </div>
 
-              {/* Logradouro */}
               <div className="flex flex-col gap-2">
                 <label className="font-default text-neutral">
                   Logradouro <span className="text-red-500">*</span>
@@ -289,7 +296,6 @@ export default function CadastrarCliente() {
                 />
               </div>
 
-              {/* Número */}
               <div className="flex flex-col gap-2">
                 <label className="font-default text-neutral">
                   Número <span className="text-red-500">*</span>
@@ -300,6 +306,7 @@ export default function CadastrarCliente() {
                   value={formData.numero}
                   onChange={handleChange}
                   placeholder="Digite o número"
+                  maxLength={5}
                   className="
                     w-full border border-neutral/20 rounded-lg 
                     py-2 px-3 text-sm text-neutral placeholder-neutral/50 
@@ -308,7 +315,6 @@ export default function CadastrarCliente() {
                 />
               </div>
 
-              {/* Bairro */}
               <div className="flex flex-col gap-2">
                 <label className="font-default text-neutral">
                   Bairro <span className="text-red-500">*</span>
@@ -327,7 +333,6 @@ export default function CadastrarCliente() {
                 />
               </div>
 
-              {/* CEP */}
               <div className="flex flex-col gap-2">
                 <label className="font-default text-neutral">
                   CEP <span className="text-red-500">*</span>
@@ -347,7 +352,6 @@ export default function CadastrarCliente() {
                 />
               </div>
 
-              {/* Complemento */}
               <div className="col-span-2 flex flex-col gap-2">
                 <label className="font-default text-neutral">
                   Complemento <span className="text-red-500">*</span>
@@ -360,7 +364,7 @@ export default function CadastrarCliente() {
                   placeholder="Digite o complemento"
                   className="
                     w-full border border-neutral/20 rounded-lg 
-                    py-2 px-3 text-sm placeholder-neutral/50 
+                    py-2 px-3 text-sm text-neutral placeholder-neutral/50 
                     focus:outline-none focus:ring-1 focus:ring-title
                   "
                 />
@@ -370,7 +374,6 @@ export default function CadastrarCliente() {
         </main>
       </div>
 
-      {/* Modal de Confirmação */}
       <ConfirmationModal
         isOpen={modalConfig.isOpen}
         onClose={closeModal}
@@ -382,7 +385,6 @@ export default function CadastrarCliente() {
         type={modalConfig.type}
       />
 
-      {/* Modal de Sucesso */}
       <SuccessModal
         isOpen={isSuccessModalOpen}
         onClose={() => {
