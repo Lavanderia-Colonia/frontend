@@ -82,8 +82,8 @@ export default function Header() {
             <Link
               href="/pedidos/orders-table"
               className={`title-default mr-10 relative text-base font-medium transition-colors ${isActive("/pedidos")
-                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
-                  : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title after:opacity-0 hover:after:opacity-100"
+                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title"
+                  : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title after:opacity-0 hover:after:opacity-100"
                 }
               `}
             >
@@ -93,8 +93,8 @@ export default function Header() {
             <Link
               href="/clients"
               className={`title-default mr-10 relative text-base font-medium transition-colors ${isActive("/clients")
-                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
-                  : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title after:opacity-0 hover:after:opacity-100"
+                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title"
+                  : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title after:opacity-0 hover:after:opacity-100"
                 }`
               }
             >
@@ -104,8 +104,8 @@ export default function Header() {
             <Link
               href="/config"
               className={`title-default mr-10 relative text-base font-medium transition-colors ${isActive("/config")
-                ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title"
-                : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[1px] after:bg-title after:opacity-0 hover:after:opacity-100"
+                ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title"
+                : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title after:opacity-0 hover:after:opacity-100"
                 }`}
             >
               Configurações
@@ -117,7 +117,7 @@ export default function Header() {
         <div className="flex items-center">
           <button
             onClick={handleLogoutClick}
-            className="flex items-center gap-2 title-default text-neutral/60 hover:text-title transition-colors"
+            className="flex items-center gap-2 title-default text-neutral/60 hover:text-title transition-colors cursor-pointer"
           >
             <SairIcon className="w-5 h-5" />
             <span className="title-default">Sair</span>
