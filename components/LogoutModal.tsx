@@ -57,13 +57,13 @@ export default function LogoutModal({
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 px-6 py-3 rounded-lg border-2 border-red-600 text-red-600 font-medium hover:bg-red-50 transition-colors"
+            className="flex-1 px-6 py-3 rounded-lg border-2 border-red-600 text-red-600 font-medium hover:bg-red-50 transition-colors cursor-pointer"
           >
             Cancelar
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 px-6 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
+            className="flex-1 px-6 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium transition-colors cursor-pointer"
           >
             Sair
           </button>
