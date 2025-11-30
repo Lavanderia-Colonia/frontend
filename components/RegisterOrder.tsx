@@ -15,14 +15,6 @@ import { IClientes } from "@/models/clientes";
 import { IProdutos } from "@/models/produtos";
 import { listProducts, listProductsResponse } from "../services/productService";
 
-const itens = [
-    { code: "18927-2" },
-    { code: "28173-9" },
-    { code: "91872-1" },
-    { code: "55012-4" },
-    { code: "77129-6" }
-];
-
 const colors = [
     { name: "vermelho" },
     { name: "azul" },
@@ -66,7 +58,7 @@ function Etapa1({ setEtapa,
                 <p>Antes de adicionar um pedido, preencha algumas informações:</p>
                 <p>
                     Tipo de finalização:
-                    <span className="text-red-500"> *</span>
+                    <span className="text-error"> *</span>
                 </p>
 
                 <div className="flex items-center gap-6">
@@ -277,7 +269,7 @@ function Etapa2({
             <div className="grid grid-cols-2 gap-6">
                 <div className="flex flex-col gap-2">
                     <label className="font-default text-neutral">
-                        Código do item <span className="text-red-500">*</span>
+                        Código do item <span className="text-error">*</span>
                     </label>
 
                     <DropdownCodigoItem<listProductsResponse>
@@ -296,7 +288,7 @@ function Etapa2({
 
                 <div className="flex flex-col gap-2">
                     <label className="font-default text-neutral">
-                        Valor do item <span className="text-red-500">*</span>
+                        Valor do item <span className="text-error">*</span>
                     </label>
                     <input
                         value={displayValue}
@@ -319,7 +311,7 @@ function Etapa2({
 
                 <div className="flex flex-col gap-2">
                     <label className="font-default text-neutral"                    >
-                        Marca <span className="text-red-500">*</span>
+                        Marca <span className="text-error">*</span>
                     </label>
                     <input
                         onChange={(value) => setBrand(value.target.value)}
@@ -335,7 +327,7 @@ function Etapa2({
 
                 <div className="flex flex-col gap-2">
                     <label className="font-default text-neutral">
-                        Cor da peça <span className="text-red-500">*</span>
+                        Cor da peça <span className="text-error">*</span>
                     </label>
 
                     <DropdownCodigoItem
