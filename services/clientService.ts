@@ -22,6 +22,49 @@ export interface CreateClientResponse {
   complement?: string;
 }
 
+export interface Client {
+  id: number;
+  active: boolean;
+  name: string;
+  telephone: string;
+  street: string;
+  number: string;
+  district: string;
+  zipCode: string;
+  complement: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SortInfo {
+  sorted: boolean;
+  unsorted: boolean;
+  empty: boolean;
+}
+
+export interface Pageable {
+  pageNumber: number;
+  pageSize: number;
+  sort: SortInfo;
+  offset: number;
+  paged: boolean;
+  unpaged: boolean;
+}
+
+export interface GetClientsResponse {
+  content: Client[];
+  pageable: Pageable;
+  last: boolean;
+  totalPages: number;
+  totalElements: number;
+  numberOfElements: number;
+  first: boolean;
+  size: number;
+  number: number;
+  sort: SortInfo;
+  empty: boolean;
+}
+
 export const createClient = async (
   clientData: CreateClientRequest
 ): Promise<CreateClientResponse> => {
@@ -47,14 +90,18 @@ export const createClient = async (
   }
 };
 
-export const getClients = async (): Promise<IClientes[]> => {
+export const getClients = async (
+  page: number,
+  pageSize: number,
+  name: string
+): Promise<GetClientsResponse> => {
   try {
-    const response = await apiRequest('/clients', {
-      method: 'GET',
-    });
+    const response = await apiRequest(
+      `/clients?page=${page}&page_size=${pageSize}&name=${encodeURIComponent(name)}`,
+      { method: 'GET' }
+    );
 
-    const data = await response.json();
-    return data;
+    return await response.json();
   } catch (error) {
     console.error('Erro ao buscar clientes:', error);
     throw error;
