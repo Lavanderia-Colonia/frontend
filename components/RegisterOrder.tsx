@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Header from "@/components/Header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
@@ -13,6 +13,7 @@ import { IPedidos } from "@/models/pedidos";
 import { ResumoPedido } from "./ResumoPedido";
 import { IClientes } from "@/models/clientes";
 import { IProdutos } from "@/models/produtos";
+import { listProducts, listProductsResponse } from "../services/productService";
 
 const itens = [
     { code: "18927-2" },
@@ -231,6 +232,9 @@ function Etapa2({
     pedido: IPedidos;
     setPedido: React.Dispatch<React.SetStateAction<IPedidos>>;
 }) {
+    const [products, setProducts] = useState<listProductsResponse[]>([]);
+    const [loadingProducts, setLoadingProducts] = useState(true);
+
     const [code, setCode] = useState("");
     const [displayValue, setDisplayValue] = useState("0,00");
     const [value, setValue] = useState(0);
@@ -238,6 +242,10 @@ function Etapa2({
     const [color, setColor] = useState("");
     const [pieces, setPieces] = useState(0);
     const finalPrice = value && pieces ? Number(value) * Number(pieces) : "-";
+
+    useEffect(() => {
+        listProducts().then(setProducts);
+    }, []);
 
     const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         let v = e.target.value;
@@ -272,12 +280,17 @@ function Etapa2({
                         Código do item <span className="text-red-500">*</span>
                     </label>
 
-                    <DropdownCodigoItem
-                        items={itens}
+                    <DropdownCodigoItem<listProductsResponse>
+                        items={products}
                         filterKey="code"
+                        displayKey="code"
                         placeholder="Selecione"
-                        onClickPlaceholder={code ?? "|Selecione ou pesquise"}
-                        onSelect={(value, item) => setCode(item.code)}
+                        onClickPlaceholder="|Selecione ou pesquise"
+                        onSelect={(value, item) => {
+                            setCode(item.code);
+                            setValue(item.price);
+                            setDisplayValue(item.price.toFixed(2).replace('.', ','));
+                        }}
                     />
                 </div>
 
