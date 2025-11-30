@@ -4,10 +4,28 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import logoLogin from "../../public/logo_login.svg";
 import { Eye, EyeOff } from 'lucide-react';
+import { signIn } from "@/services/authService";
 
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+
+  const [login, setLogin] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      await signIn({
+        login,
+        password,
+      });
+
+      router.push("/pedidos/orders-table");
+    } catch (error) {
+      setErrorMessage("Usuário ou senha incorretos.");
+    }
+  };
 
   return (
     <div className="flex h-screen w-full">
@@ -24,6 +42,8 @@ export default function LoginPage() {
           <label className="block mb-1 text-neutral/70">Nome de usuário</label>
           <input
             type="text"
+            value={login}
+            onChange={(e) => setLogin(e.target.value)}
             placeholder="Digite o nome de usuário"
             className="w-full border border-neutral-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-title text-default text-neutral/60"
           />
@@ -34,6 +54,8 @@ export default function LoginPage() {
           <div className="relative">
             <input
               type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Digite sua senha"
               className="w-full border border-neutral-300 rounded-md px-4 py-2 outline-none focus:ring-2 focus:ring-title text-default text-neutral/60"
             />
@@ -46,9 +68,13 @@ export default function LoginPage() {
           </div>
         </div>
 
+        {errorMessage && (
+          <p className="text-error mb-4">{errorMessage}</p>
+        )}
+
         <button
           className="w-full bg-title text-white font-semibold py-3 rounded-lg hover:bg-[#012444] transition-all cursor-pointer"
-          onClick={() => router.push(`/pedidos/orders-table`)}
+          onClick={handleLogin}
         >
           Entrar
         </button>
