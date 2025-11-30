@@ -1,147 +1,151 @@
 "use client";
-import { useRouter, useParams } from 'next/navigation';
-import { Clock, Edit } from 'lucide-react';
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Client } from "@/services/clientService";
+import Header from "@/components/Header";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretLeft } from "@fortawesome/free-solid-svg-icons";
-import Header from "@/components/Header";
+import { Clock, Edit } from "lucide-react";
+import { formatCEP, formatPhone } from "@/utils/clientUtils";
 
-export default function ClientDetails() {
+export default function ClientDetailsPage() {
   const router = useRouter();
-  const params = useParams();
-  const clientId = params.id;
 
-  // Dados de exemplo - substituir por busca real do cliente
-  const cliente = {
-    id: clientId,
-    nomeCompleto: 'Ana Carolina Souza',
-    telefone: '(11) 12345-6789',
-    logradouro: 'Rua Ipiranga',
-    numero: '126',
-    bairro: 'Centro',
-    cep: '12345-678',
-    complemento: '-'
-  };
+  const [client] = useState<Client | null>(() => {
+    if (typeof window === "undefined") return null;
+
+    const stored = localStorage.getItem("selectedClient");
+    if (!stored) return null;
+
+    try {
+      return JSON.parse(stored);
+    } catch (err) {
+      console.error("Erro ao parsear cliente:", err);
+      return null;
+    }
+  });
 
   const handleEdit = () => {
-    router.push(`/clients/${clientId}/edit`);
+    router.push("/clients/${clientId}/edit");
   };
-
   const handleHistory = () => {
-    router.push(`/clients/${clientId}/history`);
+    router.push("/clients/${clientId}/history");
   };
-
   const handleBack = () => {
     router.push('/clients');
   };
 
+  if (!client) {
+    return (
+      <div className="p-6 text-center">
+        <p className="text-neutral/60">Nenhum cliente encontrado.</p>
+
+        <button
+          onClick={() => router.back()}
+          className="mt-4 px-4 py-2 bg-title text-white rounded"
+        >
+          Voltar
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100">
       <Header />
-      
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="w-full flex justify-center">
           <div className="rounded-3xl bg-white p-6 shadow w-full min-h-[260px]">
-            {/* Header com botão voltar e título */}
+
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center">
                 <button
                   onClick={handleBack}
-                  className="text-title hover:text-[#012444] flex items-center mr-1"
-                >
+                  className="text-title hover:text-[#012444] flex items-center mr-1" >
                   <FontAwesomeIcon icon={faCaretLeft} size="lg" />
                 </button>
-                <h1 className="text-2xl font-bold text-title">
-                  Detalhes do cliente - {cliente.nomeCompleto}
-                </h1>
+                <h1 className="text-2xl font-bold text-title"> Detalhes do cliente - {client.name} </h1>
               </div>
-              
               <div className="flex gap-3">
+
                 <button
                   onClick={handleHistory}
-                  className="flex items-center gap-2 px-5 py-2 border border-title rounded-lg hover:bg-title/10 text-title font-semibold transition-colors"
-                >
+                  className="flex items-center gap-2 px-5 py-2 border border-title rounded-lg hover:bg-title/10 text-title font-semibold transition-colors" >
                   Histórico
                   <Clock size={18} />
                 </button>
+
                 <button
                   onClick={handleEdit}
-                  className="flex items-center gap-2 px-5 py-2 bg-title text-white rounded-lg hover:bg-[#012444] font-semibold transition-colors"
-                >
+                  className="flex items-center gap-2 px-5 py-2 bg-title text-white rounded-lg hover:bg-[#012444] font-semibold transition-colors" >
                   Editar
                   <Edit size={18} />
                 </button>
+
               </div>
             </div>
 
-            {/* Card com informações do cliente */}
             <div className="mt-4 grid grid-cols-2 gap-x-24 gap-y-6">
-              {/* Nome completo */}
               <div className="flex flex-col gap-1">
                 <span className="font-default text-neutral">
-                  Nome completo
-                </span>
+                  Nome completo </span>
                 <span className="text-neutral">
-                  {cliente.nomeCompleto}
+                  {client.name}
                 </span>
               </div>
 
-              {/* Telefone */}
               <div className="flex flex-col gap-1">
                 <span className="font-default text-neutral">
                   Telefone
                 </span>
                 <span className="text-neutral">
-                  {cliente.telefone}
+                  {formatPhone(client.telephone)}
                 </span>
               </div>
 
-              {/* Logradouro */}
               <div className="flex flex-col gap-1">
                 <span className="font-default text-neutral">
                   Logradouro
                 </span>
                 <span className="text-neutral">
-                  {cliente.logradouro}
+                  {client.street}
                 </span>
               </div>
 
-              {/* Número */}
               <div className="flex flex-col gap-1">
                 <span className="font-default text-neutral">
                   Número
                 </span>
                 <span className="text-neutral">
-                  {cliente.numero}
+                  {client.number}
                 </span>
               </div>
 
-              {/* Bairro */}
               <div className="flex flex-col gap-1">
                 <span className="font-default text-neutral">
                   Bairro
                 </span>
                 <span className="text-neutral">
-                  {cliente.bairro}
+                  {client.district}
                 </span>
               </div>
 
-              {/* CEP */}
               <div className="flex flex-col gap-1">
                 <span className="font-default text-neutral">
                   CEP
                 </span>
                 <span className="text-neutral">
-                  {cliente.cep}
+                  {formatCEP(client.zipCode)}
                 </span>
               </div>
 
-              {/* Complemento */}
               <div className="col-span-2 flex flex-col gap-1">
                 <span className="font-default text-neutral">
                   Complemento
                 </span>
                 <span className="text-neutral">
-                  {cliente.complemento}
+                  {client.complement || "-"}
                 </span>
               </div>
             </div>
