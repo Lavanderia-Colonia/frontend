@@ -148,3 +148,17 @@ export const updateClient = async (
   }
 };
 
+export const toogleActiveClient = async (id: string) => {
+  try {
+    const response = await apiRequest(`/clients/${id}/toggle-active`, {
+      method: 'PUT'
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Erro ao ativar/desativar cliente:', error);
+    throw error;
+  }
+};
+
