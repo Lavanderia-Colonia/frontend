@@ -1,7 +1,8 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EyeOff, Eye } from 'lucide-react';
 import Header from '@/components/Header';
+import { changeName, changePassword, viewAdmin, viewAdminResponse } from '@/services/userService';
 
 type AuditLog = {
   id: number;
@@ -24,13 +25,84 @@ const sampleAuditLogs: AuditLog[] = [
 
 export default function ConfiguracoesPage() {
   const [activeTab, setActiveTab] = useState<'privacidade' | 'auditoria'>('privacidade');
-  const [username, setUsername] = useState('Master');
+  const [username, setUsername] = useState('');
   const [senhaAtual, setSenhaAtual] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmaSenha, setConfirmaSenha] = useState('');
   const [showSenhaAtual, setShowSenhaAtual] = useState(false);
   const [showNovaSenha, setShowNovaSenha] = useState(false);
   const [showConfirmaSenha, setShowConfirmaSenha] = useState(false);
+
+  const [admin, setAdmin] = useState<viewAdminResponse | null>(null);
+  const [loadingAdmin, setLoadingAdmin] = useState(true);
+  const [editingPassword, setEditingPassword] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  useEffect(() => {
+    async function loadAdmin() {
+      try {
+        const data = await viewAdmin();
+        setAdmin(data);
+        setUsername(data.name);
+      } catch (error) {
+        console.error("Erro ao carregar admin:", error);
+      } finally {
+        setLoadingAdmin(false);
+      }
+    }
+
+    loadAdmin();
+  }, []);
+
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
+  const handleChangeName = (value: string) => {
+    setUsername(value);
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = setTimeout(async () => {
+      try {
+        await changeName(value);
+      } catch (err) {
+        console.error("Erro ao atualizar nome", err);
+      }
+    }, 1500);
+  };
+
+  const handleChangePassword = async () => {
+    if (!senhaAtual || !novaSenha || !confirmaSenha) {
+      alert("Preencha todos os campos.");
+      return;
+    }
+
+    if (novaSenha.length < 8) {
+      alert("A nova senha deve conter pelo menos 8 caracteres.");
+      return;
+    }
+
+    if (novaSenha !== confirmaSenha) {
+      alert("A nova senha e a confirmação devem ser iguais.");
+      return;
+    }
+
+    try {
+      setSavingPassword(true);
+      await changePassword(senhaAtual, novaSenha);
+
+      setSenhaAtual("");
+      setNovaSenha("");
+      setConfirmaSenha("");
+      setEditingPassword(false);
+    } catch (err) {
+      alert("Erro ao alterar senha.");
+      console.error(err);
+    } finally {
+      setSavingPassword(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -44,47 +116,48 @@ export default function ConfiguracoesPage() {
         <div className="flex gap-8 border-b border-gray-200 mb-8">
           <button
             onClick={() => setActiveTab('privacidade')}
-            className={`pb-4 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'privacidade'
-                ? 'text-blue-900 border-blue-900'
-                : 'text-gray-400 border-transparent hover:text-gray-600'
-            }`}
+            className={`pb-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'privacidade'
+              ? 'text-blue-900 border-blue-900'
+              : 'text-gray-400 border-transparent hover:text-gray-600'
+              }`}
           >
             Privacidade e segurança
           </button>
           <button
             onClick={() => setActiveTab('auditoria')}
-            className={`pb-4 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'auditoria'
-                ? 'text-blue-900 border-blue-900'
-                : 'text-gray-400 border-transparent hover:text-gray-600'
-            }`}
+            className={`pb-4 text-sm font-medium border-b-2 transition-colors ${activeTab === 'auditoria'
+              ? 'text-blue-900 border-blue-900'
+              : 'text-gray-400 border-transparent hover:text-gray-600'
+              }`}
           >
             Registro de auditoria
           </button>
         </div>
 
-        {/* Privacidade e segurança Tab */}
         {activeTab === 'privacidade' && (
           <div className="max-w-xl space-y-8">
-            {/* Nome do usuário */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Nome do usuário
               </label>
+
               <input
                 type="text"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
+                onChange={(e) => handleChangeName(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg 
+               focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
               />
             </div>
 
-            {/* Alterar senha section */}
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-blue-900">Alterar senha</h2>
-                <button className="flex items-center gap-2 px-6 py-2 border-2 border-blue-900 text-blue-900 rounded-lg hover:bg-blue-50 transition-colors font-medium">
+                <button
+                  onClick={handleChangePassword}
+                  disabled={savingPassword}
+                  className="flex items-center gap-2 px-6 py-2 border-2 border-blue-900 text-blue-900 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+                >
                   Alterar
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -92,7 +165,6 @@ export default function ConfiguracoesPage() {
                 </button>
               </div>
 
-              {/* Senha atual */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Senha atual
@@ -175,9 +247,8 @@ export default function ConfiguracoesPage() {
               {sampleAuditLogs.map((log, index) => (
                 <div
                   key={log.id}
-                  className={`px-6 py-4 rounded-lg ${
-                    index % 2 === 0 ? 'bg-gray-100' : 'bg-white'
-                  }`}
+                  className={`px-6 py-4 rounded-lg ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'
+                    }`}
                 >
                   <p className="text-sm text-gray-600">
                     {log.message} - {log.timestamp}
