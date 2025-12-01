@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build && node scripts/copy-build.js",
-    "start": "next start",
+    "start": "cd dist && node server.js",
+    "start:dev": "next start",
     "lint": "eslint"
   },
   "dependencies": {
