@@ -78,39 +78,38 @@ export default function Header() {
             />
           </div>
 
-          <nav className="flex items-center gap-10 h-8">
+          <nav className="grid grid-cols-3 gap-10 place-items-center h-8">
             <Link
               href="/pedidos/orders-table"
-              className={`title-default mr-10 relative text-base font-medium transition-colors ${isActive("/pedidos")
-                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title"
-                  : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title after:opacity-0 hover:after:opacity-100"
-                }
-              `}
+              className={`title-default relative text-base font-medium transition-colors ${isActive("/pedidos")
+                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-1 after:w-[140px] after:h-[1px] after:bg-title"
+                  : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-1 after:w-[140px] after:h-[1px] after:bg-title after:opacity-0 hover:after:opacity-100"
+                }`}
             >
               Pedidos
             </Link>
 
             <Link
               href="/clients"
-              className={`title-default mr-10 relative text-base font-medium transition-colors ${isActive("/clients")
-                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title"
-                  : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title after:opacity-0 hover:after:opacity-100"
-                }`
-              }
+              className={`title-default relative text-base font-medium transition-colors ${isActive("/clients")
+                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-1 after:w-[140px] after:h-[1px] after:bg-title"
+                  : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-1 after:w-[140px] after:h-[1px] after:bg-title after:opacity-0 hover:after:opacity-100"
+                }`}
             >
               Clientes
             </Link>
 
             <Link
               href="/config"
-              className={`title-default mr-10 relative text-base font-medium transition-colors ${isActive("/config")
-                ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title"
-                : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-2.5 after:w-32 after:h-[px] after:bg-title after:opacity-0 hover:after:opacity-100"
+              className={`title-default relative text-base font-medium transition-colors ${isActive("/config")
+                  ? "text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-1 after:w-[140px] after:h-[1px] after:bg-title"
+                  : "text-neutral/60 hover:text-title after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:-bottom-1 after:w-[140px] after:h-[1px] after:bg-title after:opacity-0 hover:after:opacity-100"
                 }`}
             >
               Configurações
             </Link>
           </nav>
+
         </div>
 
         {/* Botão Sair */}
