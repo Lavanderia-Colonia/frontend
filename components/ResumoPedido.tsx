@@ -103,10 +103,8 @@ export function ResumoPedido({ pedido, setPedido, orderId, isEditMode = false }:
         : "RETIRADA";
 
       // Converter prazo de dd/mm/aaaa para YYYY-MM-DD
-
       const [dia, mes, ano] = pedido.prazo.split('/');
-      const data = new Date(Number(ano), Number(mes) - 1, Number(dia), 23, 59, 0);
-      const finishDeadline = data.toISOString(); // resultado ISO completo com Z
+      const finishDeadline = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
 
       // Mapear produtos para items da API
       // Cada produto individual vira um item (não agrupamos na API)
