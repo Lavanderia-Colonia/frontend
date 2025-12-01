@@ -73,19 +73,21 @@ export function ResumoPedido({ pedido, setPedido, orderId, isEditMode = false }:
       return;
     }
 
+    console.log(pedido)
+
     // Validar se todos os produtos têm productId e colorId válidos
     const produtosInvalidos = pedido.products.filter(p => {
       const productId = p.productId;
       const colorId = p.colorId;
       const isValidProductId = productId !== undefined && productId !== null && !isNaN(Number(productId)) && Number(productId) > 0;
       const isValidColorId = colorId !== undefined && colorId !== null && !isNaN(Number(colorId)) && Number(colorId) > 0;
-      
+
       if (!isValidProductId || !isValidColorId) {
         console.log("Produto inválido:", p);
       }
       return !isValidProductId || !isValidColorId;
     });
-    
+
     if (produtosInvalidos.length > 0) {
       const produtosLista = produtosInvalidos.map(p => p.code || "sem código").join(", ");
       alert(`Os seguintes produtos não têm dados válidos: ${produtosLista}.\n\nIsso pode acontecer se os produtos foram adicionados antes de uma atualização.\n\nPor favor, remova esses itens usando a lixeira e adicione-os novamente selecionando o produto e a cor do dropdown.`);
@@ -96,13 +98,15 @@ export function ResumoPedido({ pedido, setPedido, orderId, isEditMode = false }:
 
     try {
       // Converter finishType
-      const finishType = pedido.tipoFinalizacao.toUpperCase() === "ENTREGA" 
-        ? "ENTREGA" 
+      const finishType = pedido.tipoFinalizacao.toUpperCase() === "ENTREGA"
+        ? "ENTREGA"
         : "RETIRADA";
 
       // Converter prazo de dd/mm/aaaa para YYYY-MM-DD
+
       const [dia, mes, ano] = pedido.prazo.split('/');
-      const finishDeadline = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+      const data = new Date(Number(ano), Number(mes) - 1, Number(dia), 23, 59, 0);
+      const finishDeadline = data.toISOString(); // resultado ISO completo com Z
 
       // Mapear produtos para items da API
       // Cada produto individual vira um item (não agrupamos na API)
@@ -134,7 +138,7 @@ export function ResumoPedido({ pedido, setPedido, orderId, isEditMode = false }:
         // Modo de criação - criar novo pedido
         await createOrder(orderData);
       }
-      
+
       // Mostrar modal de sucesso
       setShowSuccessModal(true);
     } catch (error: any) {
@@ -221,9 +225,9 @@ export function ResumoPedido({ pedido, setPedido, orderId, isEditMode = false }:
                   "
                   title="Excluir item"
                 >
-                  <Trash2 
-                    size={18} 
-                    className="text-red-500" 
+                  <Trash2
+                    size={18}
+                    className="text-red-500"
                     strokeWidth={2.5}
                   />
                 </button>
@@ -240,8 +244,8 @@ export function ResumoPedido({ pedido, setPedido, orderId, isEditMode = false }:
                 mt-5
                 hover:bg-[#012444]
                 transition-colors
-                ${loading 
-                  ? 'opacity-50 cursor-not-allowed' 
+                ${loading
+                  ? 'opacity-50 cursor-not-allowed'
                   : 'cursor-pointer'
                 }
               `}
