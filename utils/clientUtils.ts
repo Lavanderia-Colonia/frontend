@@ -21,3 +21,13 @@ export function formatCEP(cep?: string) {
     }
     return cep;
 }
+
+export function unformatPhone(phone?: string): string {
+    if (!phone) return "";
+    return phone.replace(/\D/g, "");
+}
+
+export function unformatCEP(cep?: string): string {
+    if (!cep) return "";
+    return cep.replace(/\D/g, "");
+}
