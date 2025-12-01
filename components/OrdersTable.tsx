@@ -229,14 +229,14 @@ export default function PedidosDashboard() {
                 onClick={() => setStatusFilter(statusFilter === "paid" ? "all" : "paid")}
                 className={`flex items-center gap-2 cursor-pointer ${statusFilter === "paid" ? "text-gray-700" : "text-gray-400"}`}
               >
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-sucess"></span>
                 Pago - Saída
               </button>
               <button
                 onClick={() => setStatusFilter(statusFilter === "cancelled" ? "all" : "cancelled")}
                 className={`flex items-center gap-2 cursor-pointer ${statusFilter === "cancelled" ? "text-gray-700" : "text-gray-400"}`}
               >
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-error"></span>
                 Cancelado
               </button>
             </div>

@@ -27,10 +27,12 @@ export default function ClientDetailsPage() {
   });
 
   const handleEdit = () => {
-    router.push("/clients/${clientId}/edit");
+    if (client)
+      router.push(`/clients/${client.id}/edit`);
   };
   const handleHistory = () => {
-    router.push("/clients/${clientId}/history");
+    if (client)
+      router.push(`/clients/${client.id}/history`);
   };
   const handleBack = () => {
     router.push('/clients');
@@ -62,7 +64,7 @@ export default function ClientDetailsPage() {
               <div className="flex items-center">
                 <button
                   onClick={handleBack}
-                  className="text-title hover:text-[#012444] flex items-center mr-1" >
+                  className="text-title hover:text-title/50 flex items-center mr-1" >
                   <FontAwesomeIcon icon={faCaretLeft} size="lg" />
                 </button>
                 <h1 className="text-2xl font-bold text-title"> Detalhes do cliente - {client.name} </h1>
