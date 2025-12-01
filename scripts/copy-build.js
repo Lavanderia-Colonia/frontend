@@ -101,3 +101,4 @@ function copyRecursiveSync(src, dest) {
 
 console.log('✓ Build files copied to dist directory successfully');
 console.log(`✓ Dist directory contents: ${fs.readdirSync(distDir).join(', ')}`);
+

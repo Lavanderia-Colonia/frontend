@@ -14,16 +14,7 @@ import { ResumoPedido } from "./ResumoPedido";
 import { IClientes } from "@/models/clientes";
 import { IProdutos } from "@/models/produtos";
 import { listProducts, listProductsResponse } from "../services/productService";
-
-const colors = [
-    { name: "vermelho" },
-    { name: "azul" },
-    { name: "verde" },
-    { name: "roxo" },
-    { name: "amarelo" },
-    { name: "preto" },
-    { name: "rosa" }
-]
+import { getOrderItemColors, OrderItemColor } from "../services/orderService";
 
 function Etapa1({ setEtapa,
     pedido,
@@ -32,7 +23,21 @@ function Etapa1({ setEtapa,
         pedido: IPedidos;
         setPedido: React.Dispatch<React.SetStateAction<IPedidos>>;
     }) {
-    const [selected, setSelected] = useState<string>(pedido ? pedido.tipoFinalizacao : "");
+    // Normalizar tipoFinalizacao para minúsculas para garantir compatibilidade
+    const normalizedTipoFinalizacao = pedido?.tipoFinalizacao 
+      ? pedido.tipoFinalizacao.toLowerCase() 
+      : "";
+    const [selected, setSelected] = useState<string>(normalizedTipoFinalizacao);
+    
+    // Sincronizar com pedido quando mudar
+    useEffect(() => {
+      const normalized = pedido?.tipoFinalizacao 
+        ? pedido.tipoFinalizacao.toLowerCase() 
+        : "";
+      if (normalized !== selected) {
+        setSelected(normalized);
+      }
+    }, [pedido?.tipoFinalizacao]);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleSelectCliente = (cliente: IClientes) => {
@@ -226,17 +231,40 @@ function Etapa2({
 }) {
     const [products, setProducts] = useState<listProductsResponse[]>([]);
     const [loadingProducts, setLoadingProducts] = useState(true);
+    const [colors, setColors] = useState<OrderItemColor[]>([]);
+    const [loadingColors, setLoadingColors] = useState(true);
 
     const [code, setCode] = useState("");
+    const [productId, setProductId] = useState<number | undefined>(undefined);
     const [displayValue, setDisplayValue] = useState("0,00");
     const [value, setValue] = useState(0);
     const [brand, setBrand] = useState("");
     const [color, setColor] = useState("");
+    const [colorId, setColorId] = useState<number | undefined>(undefined);
     const [pieces, setPieces] = useState(0);
+    const [observation, setObservation] = useState("");
+    const [resetKey, setResetKey] = useState(0); // Key para resetar os dropdowns
     const finalPrice = value && pieces ? Number(value) * Number(pieces) : "-";
 
     useEffect(() => {
-        listProducts().then(setProducts);
+        const loadData = async () => {
+            try {
+                const [productsData, colorsData] = await Promise.all([
+                    listProducts(),
+                    getOrderItemColors()
+                ]);
+                setProducts(productsData);
+                console.log("Cores carregadas:", colorsData);
+                console.log("Primeira cor exemplo:", colorsData[0]);
+                setColors(colorsData);
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
+            } finally {
+                setLoadingProducts(false);
+                setLoadingColors(false);
+            }
+        };
+        loadData();
     }, []);
 
     const handleValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -273,6 +301,7 @@ function Etapa2({
                     </label>
 
                     <DropdownCodigoItem<listProductsResponse>
+                        key={`product-${resetKey}`}
                         items={products}
                         filterKey="code"
                         displayKey="code"
@@ -280,6 +309,14 @@ function Etapa2({
                         onClickPlaceholder="|Selecione ou pesquise"
                         onSelect={(value, item) => {
                             setCode(item.code);
+                            // Garantir que o ID seja convertido corretamente
+                            const id = Number(item.id);
+                            if (isNaN(id) || id <= 0) {
+                                console.error("ID do produto inválido:", item.id);
+                                alert("Erro ao selecionar produto. Por favor, tente novamente.");
+                                return;
+                            }
+                            setProductId(id);
                             setValue(item.price);
                             setDisplayValue(item.price.toFixed(2).replace('.', ','));
                         }}
@@ -314,6 +351,7 @@ function Etapa2({
                         Marca <span className="text-error">*</span>
                     </label>
                     <input
+                        value={brand}
                         onChange={(value) => setBrand(value.target.value)}
                         type="text"
                         placeholder="Digite a marca"
@@ -330,12 +368,18 @@ function Etapa2({
                         Cor da peça <span className="text-error">*</span>
                     </label>
 
-                    <DropdownCodigoItem
+                    <DropdownCodigoItem<OrderItemColor>
+                        key={`color-${resetKey}`}
                         items={colors}
                         filterKey="name"
+                        displayKey="name"
                         placeholder="Selecione"
                         onClickPlaceholder="|Selecione ou pesquise"
-                        onSelect={(value, item) => setColor(item.name)}
+                        onSelect={(value, item) => {
+                            console.log("Cor selecionada:", item);
+                            setColor(item.name || String(item));
+                            setColorId(item.id || (item as any).id);
+                        }}
                     />
                 </div>
 
@@ -344,10 +388,12 @@ function Etapa2({
                         Número de peças
                     </label>
                     <input
-                        onChange={(value) => setPieces(Number(value.target.value))}
+                        key={`pieces-${resetKey}`}
+                        value={pieces || ""}
+                        onChange={(value) => setPieces(Number(value.target.value) || 0)}
                         type="number"
                         min="0"
-                        defaultValue={0}
+                        placeholder="Digite o número de peças"
                         className="
                             w-full border border-neutral/20 rounded-lg 
                             py-2 px-3 text-sm placeholder-neutral/50
@@ -377,6 +423,8 @@ function Etapa2({
                     Observações (Opcional)
                 </label>
                 <textarea
+                    value={observation}
+                    onChange={(e) => setObservation(e.target.value)}
                     rows={5}
                     placeholder="Digite as observações"
                     className="
@@ -404,18 +452,63 @@ function Etapa2({
 
                 <button
                     onClick={() => {
+                        // Validações antes de adicionar
+                        if (!code || !productId) {
+                            alert("Por favor, selecione um produto válido");
+                            return;
+                        }
+
+                        if (!brand) {
+                            alert("Por favor, informe a marca");
+                            return;
+                        }
+
+                        if (!color || !colorId) {
+                            alert("Por favor, selecione a cor");
+                            return;
+                        }
+
+                        if (!pieces || pieces <= 0) {
+                            alert("Por favor, informe o número de peças (maior que zero)");
+                            return;
+                        }
+
+                        if (!value || value <= 0) {
+                            alert("Por favor, informe o valor do item (maior que zero)");
+                            return;
+                        }
+
                         const novoItem: IProdutos = {
                             code,
                             value,
                             brand,
                             color,
-                            pieces
+                            pieces,
+                            productId: Number(productId), // Garantir que é número
+                            colorId: Number(colorId), // Usar o ID da cor selecionada
+                            observation: observation || undefined
                         };
+
+                        // Debug: verificar se productId foi salvo
+                        console.log("Adicionando produto:", novoItem);
 
                         setPedido(prev => ({
                             ...prev,
                             products: [...prev.products, novoItem]
                         }));
+
+                        // Limpar campos após adicionar
+                        setCode("");
+                        setProductId(undefined);
+                        setDisplayValue("0,00");
+                        setValue(0);
+                        setBrand("");
+                        setColor("");
+                        setColorId(undefined);
+                        setPieces(0);
+                        setObservation("");
+                        // Resetar dropdowns forçando remontagem
+                        setResetKey(prev => prev + 1);
                     }}
                     className="
                         flex items-center gap-2 text-title border border-title
@@ -445,10 +538,12 @@ function renderEtapa(
 
 interface PedidoProps {
     pedido: IPedidos;
-    setPedido: React.Dispatch<React.SetStateAction<IPedidos>>
+    setPedido: React.Dispatch<React.SetStateAction<IPedidos>>;
+    orderId?: string;
+    isEditMode?: boolean;
 }
 
-export default function CadastrarPedido({ pedido, setPedido }: PedidoProps) {
+export default function CadastrarPedido({ pedido, setPedido, orderId, isEditMode = false }: PedidoProps) {
     const router = useRouter();
     const [etapa, setEtapa] = useState(1);
 
@@ -464,12 +559,12 @@ export default function CadastrarPedido({ pedido, setPedido }: PedidoProps) {
                         onClick={() => router.push(`/pedidos/orders-table`)}
                     >
                         <FontAwesomeIcon icon={faCaretLeft} size="lg" />
-                        Cadastrar pedido
+                        {isEditMode ? "Editar pedido" : "Cadastrar pedido"}
                     </button>
 
                     <div className="mt-10 flex gap-6 flex-1">
 
-                        <ResumoPedido pedido={pedido} />
+                        <ResumoPedido pedido={pedido} setPedido={setPedido} orderId={orderId} isEditMode={isEditMode} />
 
                         <div className="flex-1 border border-neutral/20 rounded-2xl p-6 flex flex-col min-h-[670px]">
                             <div className="flex mb-8">

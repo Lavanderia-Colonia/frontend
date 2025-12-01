@@ -1,28 +1,109 @@
 // 
 
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Save } from 'lucide-react';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretLeft } from "@fortawesome/free-solid-svg-icons";
 import Header from "@/components/Header";
 import ConfirmationModal from "@/components/ConfirmationModal";
+import { updateClient, Client } from "@/services/clientService";
+import { formatCEP, formatPhone, unformatCEP, unformatPhone } from "@/utils/clientUtils";
+import SuccessModal from "@/components/SuccessModal";
 
 export default function ClientEdit() {
   const router = useRouter();
   const params = useParams();
-  const clientId = params.id;
+  const clientId = params?.id as string;
 
-  // Estado inicial com os dados do cliente
-  const [formData, setFormData] = useState({
-    nomeCompleto: 'Ana Carolina Souza',
-    telefone: '(11) 12345-6789',
-    logradouro: 'Rua Ipiranga',
-    numero: '126',
-    bairro: 'Centro',
-    cep: '12345-678',
-    complemento: '-'
+  const [loading, setLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Funções de formatação (máscaras)
+  const formatTelefone = (value: string) => {
+    const numbers = value.replace(/\D/g, "").slice(0, 11);
+
+    if (numbers.length === 0) return "";
+
+    // DDD
+    if (numbers.length <= 2) {
+      return `(${numbers}`;
+    }
+
+    const ddd = numbers.slice(0, 2);
+    const restante = numbers.slice(2);
+
+    if (numbers.length <= 10) {
+      if (restante.length <= 4) {
+        return `(${ddd}) ${restante}`;
+      }
+
+      return `(${ddd}) ${restante.slice(0, 4)}-${restante.slice(4)}`;
+    }
+
+    if (restante.length <= 5) {
+      return `(${ddd}) ${restante}`;
+    }
+
+    return `(${ddd}) ${restante.slice(0, 5)}-${restante.slice(5)}`;
+  };
+
+  const formatCEP = (value: string) => {
+    const numbers = value.replace(/\D/g, "").slice(0, 8);
+    return numbers.replace(/(\d{5})(\d{0,3})/, "$1-$2").replace(/-$/, "");
+  };
+  
+  // Estado inicial com os dados do cliente - carregar do localStorage
+  const [formData, setFormData] = useState(() => {
+    if (typeof window === "undefined") {
+      return {
+        nomeCompleto: '',
+        telefone: '',
+        logradouro: '',
+        numero: '',
+        bairro: '',
+        cep: '',
+        complemento: ''
+      };
+    }
+
+    const stored = localStorage.getItem("selectedClient");
+    if (!stored) {
+      return {
+        nomeCompleto: '',
+        telefone: '',
+        logradouro: '',
+        numero: '',
+        bairro: '',
+        cep: '',
+        complemento: ''
+      };
+    }
+
+    try {
+      const client: Client = JSON.parse(stored);
+      return {
+        nomeCompleto: client.name || '',
+        telefone: formatPhone(client.telephone || ''),
+        logradouro: client.street || '',
+        numero: client.number || '',
+        bairro: client.district || '',
+        cep: formatCEP(client.zipCode || ''),
+        complemento: client.complement || ''
+      };
+    } catch (err) {
+      console.error("Erro ao parsear cliente do localStorage:", err);
+      return {
+        nomeCompleto: '',
+        telefone: '',
+        logradouro: '',
+        numero: '',
+        bairro: '',
+        cep: '',
+        complemento: ''
+      };
+    }
   });
 
   // Estado para controlar os modais
@@ -38,10 +119,23 @@ export default function ClientEdit() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+
+    if (name === 'telefone') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: formatTelefone(value)
+      }));
+    } else if (name === 'cep') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: formatCEP(value)
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleBackClick = () => {
@@ -65,28 +159,84 @@ export default function ClientEdit() {
     handleBackClick();
   };
 
-  const handleSave = () => {
-    // Aqui você implementaria a lógica de salvamento
-    console.log('Salvando dados:', formData);
-    
-    // Fecha qualquer modal aberto e mostra o de sucesso
+  const handleSave = async () => {
+    // Validações
+    if (!formData.nomeCompleto.trim()) {
+      alert("Por favor, informe o nome completo.");
+      return;
+    }
+
+    if (!formData.telefone.trim()) {
+      alert("Por favor, informe o telefone.");
+      return;
+    }
+
+    if (!formData.logradouro.trim()) {
+      alert("Por favor, informe o logradouro.");
+      return;
+    }
+
+    if (!formData.numero.trim()) {
+      alert("Por favor, informe o número.");
+      return;
+    }
+
+    if (!formData.bairro.trim()) {
+      alert("Por favor, informe o bairro.");
+      return;
+    }
+
+    if (!formData.cep.trim()) {
+      alert("Por favor, informe o CEP.");
+      return;
+    }
+
+    setLoading(true);
     closeModal();
-    
-    // Simula processamento
-    setTimeout(() => {
-      setModalConfig({
-        isOpen: true,
-        type: "success",
-        title: "Sucesso!",
-        message: "As alterações foram salvas com sucesso!",
-        confirmText: "Voltar",
-        cancelText: "Fechar",
-        onConfirm: () => {
-          closeModal();
-          router.push(`/clients/${clientId}`);
-        }
-      });
-    }, 300);
+
+    try {
+      // Preparar dados para a API (remover formatação)
+      const clientData = {
+        name: formData.nomeCompleto.trim(),
+        telephone: unformatPhone(formData.telefone),
+        street: formData.logradouro.trim(),
+        number: formData.numero.trim(),
+        district: formData.bairro.trim(),
+        zipCode: unformatCEP(formData.cep),
+        complement: formData.complemento.trim() || undefined
+      };
+
+      await updateClient(clientId, clientData);
+      
+      // Atualizar localStorage com os dados atualizados
+      const updatedClient: Client = {
+        id: Number(clientId),
+        active: true,
+        name: clientData.name,
+        telephone: clientData.telephone,
+        street: clientData.street,
+        number: clientData.number,
+        district: clientData.district,
+        zipCode: clientData.zipCode,
+        complement: clientData.complement || "",
+        createdAt: "",
+        updatedAt: ""
+      };
+      localStorage.setItem("selectedClient", JSON.stringify(updatedClient));
+      
+      // Mostrar modal de sucesso
+      setShowSuccessModal(true);
+    } catch (error: any) {
+      console.error("Erro ao atualizar cliente:", error);
+      alert(error.message || "Erro ao atualizar cliente. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    router.push(`/clients/${clientId}`);
   };
 
   const closeModal = () => {
@@ -124,10 +274,13 @@ export default function ClientEdit() {
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex items-center gap-2 px-6 py-2 bg-title text-white rounded-lg hover:bg-[#012444] font-semibold transition-colors"
+                  disabled={loading}
+                  className={`flex items-center gap-2 px-6 py-2 bg-title text-white rounded-lg hover:bg-[#012444] font-semibold transition-colors ${
+                    loading ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
                   <Save size={18} />
-                  Salvar
+                  {loading ? "Salvando..." : "Salvar"}
                 </button>
               </div>
             </div>
@@ -281,6 +434,15 @@ export default function ClientEdit() {
         confirmText={modalConfig.confirmText}
         cancelText={modalConfig.cancelText}
         type={modalConfig.type}
+      />
+
+      {/* Modal de Sucesso */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={handleSuccessModalClose}
+        title="Cliente atualizado com sucesso!"
+        message="As alterações foram salvas com sucesso."
+        buttonText="OK"
       />
     </>
   );

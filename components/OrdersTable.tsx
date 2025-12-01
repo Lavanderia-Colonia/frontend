@@ -167,52 +167,166 @@
 
 
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Plus, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getOrders, Order, GetOrdersResponse } from "@/services/orderService";
 
-type Order = {
-  code: string;
-  client: string;
-  pieces: number;
-  launched: string;
-  finished: string;
-  total: string;
-  status: "open" | "paid" | "cancelled";
+const PAGE_SIZE = 10;
+
+// Função para converter status da API para o formato do frontend
+const convertStatus = (status: any): "open" | "paid" | "cancelled" => {
+  // Garantir que status seja uma string
+  const statusStr = typeof status === 'string' ? status : (status?.name || status?.status || String(status || ''));
+  const statusUpper = statusStr.toUpperCase();
+  if (statusUpper === "EM_ABERTO" || statusUpper === "OPEN") return "open";
+  if (statusUpper === "PAGO" || statusUpper === "PAID") return "paid";
+  if (statusUpper === "CANCELADO" || statusUpper === "CANCELLED") return "cancelled";
+  return "open";
 };
 
-const sample: Order[] = [
-  { code: "#112345", client: "Ana Carolina Souza", pieces: 2, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "open" },
-  { code: "#112344", client: "Bruno Henrique Almeida", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "paid" },
-  { code: "#112343", client: "Camila Ferreira Costa", pieces: 2, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "cancelled" },
-  { code: "#112342", client: "Diego Rafael Martins", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "open" },
-  { code: "#112341", client: "Eduarda Silva Pereira", pieces: 6, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "paid" },
-  { code: "#112340", client: "Felipe Augusto Ramos", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "cancelled" },
-  { code: "#112339", client: "Gabriela Torres Lima", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "open" },
-  { code: "#112338", client: "Henrique Lopes Duarte", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "paid" },
-  { code: "#112337", client: "Isabela Rocha Nunes", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "cancelled" },
-  { code: "#112336", client: "João Pedro Barros", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "open" },
-];
+// Função para formatar data
+const formatDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch {
+    return dateString;
+  }
+};
+
+// Função para formatar código do pedido
+const formatOrderCode = (id: number): string => {
+  return `#${id.toString().padStart(6, '0')}`;
+};
 
 export default function PedidosDashboard() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<"all" | "open" | "paid" | "cancelled">("all");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
 
-  const filteredOrders = sample.filter(order => {
-    const matchesSearch = order.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.client.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      loadOrders();
+    }, searchTerm ? 500 : 0); // Debounce de 500ms apenas quando há busca
+
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, searchTerm, statusFilter]);
+
+  const loadOrders = async () => {
+    setLoading(true);
+    try {
+      const response: GetOrdersResponse = await getOrders(
+        currentPage,
+        PAGE_SIZE,
+        searchTerm || undefined,
+        statusFilter
+      );
+
+      // Debug: verificar estrutura dos dados
+      console.log("Resposta da API:", response);
+      if (response.content && response.content.length > 0) {
+        console.log("Primeiro pedido:", response.content[0]);
+        console.log("ID do primeiro pedido:", response.content[0].id);
+      }
+
+      setOrders(response.content);
+      setTotalPages(response.totalPages);
+      setTotalElements(response.totalElements);
+    } catch (error) {
+      console.error("Erro ao carregar pedidos:", error);
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(0); // Resetar para primeira página ao buscar
+  };
+
+  // Calcular totais de peças e valor para cada pedido
+  const ordersWithTotals = orders.map(order => {
+    const totalPieces = order.items?.reduce((acc, item) => acc + (item.quantity || 0), 0) || 0;
+    const totalValue = order.items?.reduce((acc, item) => acc + (item.unitPrice * item.quantity || 0), 0) || 0;
+    // Extrair nome do cliente (pode vir de clientName ou client.name)
+    const clientName = order.clientName || order.client?.name || `Cliente #${order.clientId}`;
+    return {
+      ...order,
+      totalPieces,
+      totalValue,
+      clientName
+    };
   });
 
-  const totalPages = 30;
+  const generatePagination = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(0, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages - 1, startPage + maxPagesToShow - 1);
+    
+    if (endPage - startPage < maxPagesToShow - 1) {
+      startPage = Math.max(0, endPage - maxPagesToShow + 1);
+    }
+
+    if (startPage > 0) {
+      pages.push(
+        <button
+          key={0}
+          onClick={() => setCurrentPage(0)}
+          className={`px-3 py-1 rounded ${currentPage === 0 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+        >
+          1
+        </button>
+      );
+      if (startPage > 1) {
+        pages.push(<span key="ellipsis1" className="px-2 text-gray-400">...</span>);
+      }
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => setCurrentPage(i)}
+          className={`px-3 py-1 rounded ${currentPage === i ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+        >
+          {i + 1}
+        </button>
+      );
+    }
+
+    if (endPage < totalPages - 1) {
+      if (endPage < totalPages - 2) {
+        pages.push(<span key="ellipsis2" className="px-2 text-gray-400">...</span>);
+      }
+      pages.push(
+        <button
+          key={totalPages - 1}
+          onClick={() => setCurrentPage(totalPages - 1)}
+          className={`px-3 py-1 rounded ${currentPage === totalPages - 1 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+        >
+          {totalPages}
+        </button>
+      );
+    }
+
+    return pages;
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       {/* Main Content */}
-      <main className="max-w-full mx-auto px-6 py-8">
+      <div className="max-w-full mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-6">
             <h1 className="text-3xl font-semibold text-[#013C72]">Pedidos</h1>
@@ -229,14 +343,14 @@ export default function PedidosDashboard() {
                 onClick={() => setStatusFilter(statusFilter === "paid" ? "all" : "paid")}
                 className={`flex items-center gap-2 cursor-pointer ${statusFilter === "paid" ? "text-gray-700" : "text-gray-400"}`}
               >
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-sucess"></span>
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span>
                 Pago - Saída
               </button>
               <button
                 onClick={() => setStatusFilter(statusFilter === "cancelled" ? "all" : "cancelled")}
                 className={`flex items-center gap-2 cursor-pointer ${statusFilter === "cancelled" ? "text-gray-700" : "text-gray-400"}`}
               >
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-error"></span>
+                <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500"></span>
                 Cancelado
               </button>
             </div>
@@ -249,7 +363,7 @@ export default function PedidosDashboard() {
                 type="text"
                 placeholder="Busque pelo código do pedido"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={handleSearchChange}
                 className="pl-10 pr-4 py-2 w-80 border border-neutral/20 rounded-lg hover:outline-none hover:ring-2 hover:ring-title text-neutral"
               />
             </div>
@@ -271,105 +385,117 @@ export default function PedidosDashboard() {
               <tr>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-title">Código</th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-title">Nome do Cliente</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-title">Peças</th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-title">Peças</th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-title">Lançamento</th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-title">Finalização</th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-title">Valor Total</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-title">Status</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-title">Ações</th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-title">Status</th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-title">Ações</th>
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map((order, index) => (
-                <tr
-                  key={order.code}
-                  className={`border-b border-gray-100 ${index % 2 === 1 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 transition-colors`}
-                >
-                  <td className="px-6 py-4 text-sm text-gray-400">{order.code}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{order.client}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{order.pieces}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{order.launched}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{order.finished}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">{order.total}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-start">
-                      {order.status === "paid" && (
-                        <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span>
-                      )}
-                      {order.status === "cancelled" && (
-                        <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500"></span>
-                      )}
-                      {order.status === "open" && (
-                        <span className="inline-block w-2.5 h-2.5 rounded-full border-2 border-gray-400"></span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button
-                      onClick={() => router.push(`/pedidos/${order.code.replace('#', '')}`)}
-                      className="text-gray-600 hover:text-tile transition-colors"
-                      aria-label={`Ver detalhes do pedido ${order.code}`}
-                    >
-                      <Eye className="w-5 h-5 cursor-pointer" />
-                    </button>
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-center text-gray-600">
+                    Carregando pedidos...
                   </td>
                 </tr>
-              ))}
+              ) : ordersWithTotals.length === 0 ? (
+                <tr>
+                  <td colSpan={8} className="px-6 py-8 text-center text-gray-600">
+                    Nenhum pedido encontrado
+                  </td>
+                </tr>
+              ) : (
+                ordersWithTotals.map((order, index) => {
+                  const status = convertStatus(order.status);
+                  const totalFormatted = order.totalValue?.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }) || "R$ 0,00";
+                  
+                  return (
+                    <tr
+                      key={order.id}
+                      className={`border-b border-gray-100 ${index % 2 === 1 ? 'bg-gray-50' : 'bg-white'} hover:bg-gray-100 transition-colors`}
+                    >
+                      <td className="px-6 py-4 text-sm text-gray-400">{formatOrderCode(order.id)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{order.clientName}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600 text-center">{order.totalPieces || 0}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{formatDate(order.createdAt)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{formatDate(order.finishDeadline)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-600">{totalFormatted}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center">
+                          {status === "paid" && (
+                            <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                          )}
+                          {status === "cancelled" && (
+                            <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                          )}
+                          {status === "open" && (
+                            <span className="inline-block w-2.5 h-2.5 rounded-full border-2 border-gray-400"></span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => {
+                            console.log("Pedido completo:", order);
+                            console.log("ID do pedido:", order.id);
+                            console.log("Tipo do ID:", typeof order.id);
+                            
+                            const orderId = order.id;
+                            if (orderId !== undefined && orderId !== null) {
+                              router.push(`/pedidos/${orderId}`);
+                            } else {
+                              console.error("ID do pedido não encontrado:", order);
+                              alert("Erro: ID do pedido não encontrado.");
+                            }
+                          }}
+                          className="text-gray-600 hover:text-title transition-colors"
+                          aria-label={`Ver detalhes do pedido ${formatOrderCode(order.id || 0)}`}
+                        >
+                          <Eye className="w-5 h-5 cursor-pointer" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-end gap-4 mt-6">
-          <span className="text-sm text-gray-600">Mostrando 10 de 300</span>
+        {!loading && totalPages > 0 && (
+          <div className="flex items-center justify-end gap-4 mt-6">
+            <span className="text-sm text-gray-600">
+              Mostrando {orders.length} de {totalElements}
+            </span>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-              className="p-2 rounded hover:bg-gray-100 transition-colors"
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                className="p-2 rounded hover:bg-gray-100 transition-colors"
+                disabled={currentPage === 0}
+              >
+                <ChevronLeft className="w-5 h-5 text-gray-600" />
+              </button>
 
-            <button
-              onClick={() => setCurrentPage(1)}
-              className={`px-3 py-1 rounded ${currentPage === 1 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
-            >
-              1
-            </button>
-            <button
-              onClick={() => setCurrentPage(2)}
-              className={`px-3 py-1 rounded ${currentPage === 2 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
-            >
-              2
-            </button>
-            <button
-              onClick={() => setCurrentPage(3)}
-              className={`px-3 py-1 rounded ${currentPage === 3 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
-            >
-              3
-            </button>
+              {generatePagination()}
 
-            <span className="px-2 text-gray-400">...</span>
-
-            <button
-              onClick={() => setCurrentPage(30)}
-              className={`px-3 py-1 rounded ${currentPage === 30 ? 'bg-[#013C72] text-white' : 'hover:bg-gray-100 text-gray-600'}`}
-            >
-              30
-            </button>
-
-            <button
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              className="p-2 rounded hover:bg-gray-100 transition-colors"
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight className="w-5 h-5 text-gray-600" />
-            </button>
+              <button
+                onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                className="p-2 rounded hover:bg-gray-100 transition-colors"
+                disabled={currentPage === totalPages - 1}
+              >
+                <ChevronRight className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
           </div>
-        </div>
-      </main>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,66 +1,121 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, Eye, ChevronLeft, ChevronRight } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCaretLeft } from "@fortawesome/free-solid-svg-icons";
 import Header from "@/components/Header";
+import { getClientHistory, Order } from "@/services/clientService";
 
 type OrderStatus = "open" | "paid" | "cancelled";
 
-type Order = {
-  code: string;
-  pieces: number;
-  launched: string;
-  finished: string;
-  total: string;
-  status: OrderStatus;
+// Função para converter status da API para o formato do frontend
+const convertStatus = (status: any): OrderStatus => {
+  const statusStr = typeof status === 'string' ? status : (status?.name || status?.status || String(status || ''));
+  const statusUpper = statusStr.toUpperCase();
+  if (statusUpper === "EM_ABERTO" || statusUpper === "OPEN") return "open";
+  if (statusUpper === "PAGO" || statusUpper === "PAID") return "paid";
+  if (statusUpper === "CANCELADO" || statusUpper === "CANCELLED") return "cancelled";
+  return "open";
 };
 
-const sampleOrders: Order[] = [
-  { code: "#112345", pieces: 2, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "open" },
-  { code: "#112344", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "paid" },
-  { code: "#112343", pieces: 2, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "cancelled" },
-  { code: "#112342", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "open" },
-  { code: "#112341", pieces: 6, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "paid" },
-  { code: "#112340", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "cancelled" },
-  { code: "#112339", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "open" },
-  { code: "#112338", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "paid" },
-  { code: "#112337", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "cancelled" },
-  { code: "#112336", pieces: 5, launched: "24/10/2025", finished: "23/10/2025", total: "R$1100,00", status: "open" }
-];
+// Função para formatar data
+const formatDate = (dateString: string): string => {
+  try {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  } catch {
+    return dateString;
+  }
+};
+
+// Função para formatar código do pedido
+const formatOrderCode = (id: number): string => {
+  return `#${String(id).padStart(6, '0')}`;
+};
 
 export default function ClientOrdersHistory() {
   const router = useRouter();
   const params = useParams();
-  const clientId = params.id;
+  const clientId = params?.id as string;
 
-  // Em um cenário real, esse nome viria da API junto com os pedidos
-  const clientName = "Ana Carolina Souza";
-
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [clientName, setClientName] = useState<string>("");
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredOrders = sampleOrders.filter(order => {
-    const matchesSearch =
-      order.code.toLowerCase().includes(searchTerm.toLowerCase());
+  useEffect(() => {
+    const loadData = async () => {
+      if (!clientId) return;
+      
+      try {
+        setLoading(true);
+        
+        // Buscar nome do cliente do localStorage (salvo na página de detalhes)
+        const storedClient = localStorage.getItem("selectedClient");
+        if (storedClient) {
+          try {
+            const client = JSON.parse(storedClient);
+            setClientName(client.name || client.nome || "");
+          } catch (e) {
+            console.error("Erro ao parsear cliente do localStorage:", e);
+          }
+        }
+        
+        // Buscar apenas o histórico (sem buscar dados do cliente separadamente)
+        const historyData = await getClientHistory(clientId);
+        setOrders(historyData);
+        
+        // Se não tiver nome do localStorage, tentar pegar do primeiro pedido
+        if (historyData.length > 0 && historyData[0].client?.name && !clientName) {
+          setClientName(historyData[0].client.name);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar histórico:", error);
+        setOrders([]);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const matchesStatus =
-      statusFilter === "all" || order.status === statusFilter;
+    loadData();
+  }, [clientId]);
+
+  // Calcular totais de peças e valor para cada pedido
+  const ordersWithTotals = orders.map(order => {
+    // Garantir que items existe e é um array
+    const items = order.items || [];
+    const totalPieces = items.reduce((acc, item) => acc + (item.quantity || 0), 0);
+    const totalValue = items.reduce((acc, item) => acc + (item.unitPrice * item.quantity || 0), 0);
+    return {
+      ...order,
+      totalPieces,
+      totalValue
+    };
+  });
+
+  // Filtrar pedidos
+  const filteredOrders = ordersWithTotals.filter(order => {
+    const orderCode = formatOrderCode(order.id);
+    const matchesSearch = searchTerm === "" || 
+      orderCode.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const status = convertStatus(order.status);
+    const matchesStatus = statusFilter === "all" || status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
-
-  const totalPages = 30;
 
   const handleBack = () => {
     router.push(`/clients/${clientId}`);
   };
 
-  const handleViewOrder = (code: string) => {
-    const orderId = code.replace("#", "");
+  const handleViewOrder = (orderId: number) => {
     router.push(`/pedidos/${orderId}`);
   };
 
@@ -81,7 +136,7 @@ export default function ClientOrdersHistory() {
                   <FontAwesomeIcon icon={faCaretLeft} size="lg" />
                 </button>
                 <h1 className="text-2xl font-bold text-title">
-                  Histórico de pedidos - {clientName}
+                  Histórico de pedidos - {clientName || "Carregando..."}
                 </h1>
               </div>
 
@@ -165,124 +220,86 @@ export default function ClientOrdersHistory() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredOrders.map((order, index) => (
-                    <tr
-                      key={order.code}
-                      className={`border-b border-gray-100 ${
-                        index % 2 === 1 ? "bg-gray-50" : "bg-white"
-                      } hover:bg-gray-100 transition-colors`}
-                    >
-                      <td className="px-6 py-4 text-sm text-gray-400">
-                        {order.code}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {order.pieces}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {order.launched}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {order.finished}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {order.total}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex items-center justify-center">
-                          {order.status === "paid" && (
-                            <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500" />
-                          )}
-                          {order.status === "cancelled" && (
-                            <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500" />
-                          )}
-                          {order.status === "open" && (
-                            <span className="inline-block w-2.5 h-2.5 rounded-full border-2 border-gray-400" />
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button
-                          onClick={() => handleViewOrder(order.code)}
-                          className="text-gray-600 hover:text-blue-900 transition-colors mx-auto"
-                          aria-label={`Ver detalhes do pedido ${order.code}`}
-                        >
-                          <Eye className="w-5 h-5 cursor-pointer" />
-                        </button>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-8 text-center text-gray-600">
+                        Carregando histórico...
                       </td>
                     </tr>
-                  ))}
+                  ) : filteredOrders.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-8 text-center text-gray-600">
+                        Nenhum pedido encontrado
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredOrders.map((order, index) => {
+                      const status = convertStatus(order.status);
+                      const totalFormatted = order.totalValue?.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      }) || "R$ 0,00";
+                      
+                      return (
+                        <tr
+                          key={order.id}
+                          className={`border-b border-gray-100 ${
+                            index % 2 === 1 ? "bg-gray-50" : "bg-white"
+                          } hover:bg-gray-100 transition-colors`}
+                        >
+                          <td className="px-6 py-4 text-sm text-gray-400">
+                            {formatOrderCode(order.id)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600 text-center">
+                            {order.totalPieces || 0}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {formatDate(order.createdAt)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {formatDate(order.finishDeadline)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600">
+                            {totalFormatted}
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex items-center justify-center">
+                              {status === "paid" && (
+                                <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500" />
+                              )}
+                              {status === "cancelled" && (
+                                <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-500" />
+                              )}
+                              {status === "open" && (
+                                <span className="inline-block w-2.5 h-2.5 rounded-full border-2 border-gray-400" />
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <button
+                              onClick={() => handleViewOrder(order.id)}
+                              className="text-gray-600 hover:text-blue-900 transition-colors mx-auto"
+                              aria-label={`Ver detalhes do pedido ${formatOrderCode(order.id)}`}
+                            >
+                              <Eye className="w-5 h-5 cursor-pointer" />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>
 
-            {/* Paginação */}
-            <div className="flex items-center justify-end gap-4 mt-6">
-              <span className="text-sm text-gray-600">Mostrando 10 de 300</span>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  className="p-2 rounded hover:bg-gray-100 transition-colors"
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="w-5 h-5 text-gray-600" />
-                </button>
-
-                <button
-                  onClick={() => setCurrentPage(1)}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === 1
-                      ? "bg-blue-900 text-white"
-                      : "hover:bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  1
-                </button>
-                <button
-                  onClick={() => setCurrentPage(2)}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === 2
-                      ? "bg-blue-900 text-white"
-                      : "hover:bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  2
-                </button>
-                <button
-                  onClick={() => setCurrentPage(3)}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === 3
-                      ? "bg-blue-900 text-white"
-                      : "hover:bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  3
-                </button>
-
-                <span className="px-2 text-gray-400">...</span>
-
-                <button
-                  onClick={() => setCurrentPage(30)}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === 30
-                      ? "bg-blue-900 text-white"
-                      : "hover:bg-gray-100 text-gray-600"
-                  }`}
-                >
-                  30
-                </button>
-
-                <button
-                  onClick={() =>
-                    setCurrentPage(Math.min(totalPages, currentPage + 1))
-                  }
-                  className="p-2 rounded hover:bg-gray-100 transition-colors"
-                  disabled={currentPage === totalPages}
-                >
-                  <ChevronRight className="w-5 h-5 text-gray-600" />
-                </button>
+            {/* Informação de resultados */}
+            {!loading && filteredOrders.length > 0 && (
+              <div className="flex items-center justify-end gap-4 mt-6">
+                <span className="text-sm text-gray-600">
+                  Mostrando {filteredOrders.length} de {orders.length} pedido(s)
+                </span>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </main>

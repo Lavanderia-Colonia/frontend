@@ -3,25 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { EyeOff, Eye } from 'lucide-react';
 import Header from '@/components/Header';
 import { changeName, changePassword, viewAdmin, viewAdminResponse } from '@/services/userService';
-
-type AuditLog = {
-  id: number;
-  message: string;
-  timestamp: string;
-};
-
-const sampleAuditLogs: AuditLog[] = [
-  { id: 1, message: "Cliente adicionado!", timestamp: "30/10/2025 - 18:00" },
-  { id: 2, message: "Cliente adicionado!", timestamp: "30/10/2025 - 18:00" },
-  { id: 3, message: "Cliente adicionado!", timestamp: "30/10/2025 - 18:00" },
-  { id: 4, message: "Cliente adicionado!", timestamp: "30/10/2025 - 18:00" },
-  { id: 5, message: "Cliente adicionado!", timestamp: "30/10/2025 - 18:00" },
-  { id: 6, message: "Cliente adicionado!", timestamp: "30/10/2025 - 18:00" },
-  { id: 7, message: "Cliente adicionado!", timestamp: "30/10/2025 - 18:00" },
-  { id: 8, message: "Cliente adicionado!", timestamp: "30/10/2025 - 18:00" },
-  { id: 9, message: "Cliente adicionado!", timestamp: "30/10/2025 - 18:00" },
-  { id: 10, message: "Cliente adicionado!", timestamp: "30/10/2025 - 18:00" },
-];
+import { getAudits, Audit } from '@/services/auditService';
 
 export default function ConfiguracoesPage() {
   const [activeTab, setActiveTab] = useState<'privacidade' | 'auditoria'>('privacidade');
@@ -37,6 +19,9 @@ export default function ConfiguracoesPage() {
   const [loadingAdmin, setLoadingAdmin] = useState(true);
   const [editingPassword, setEditingPassword] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  
+  const [auditLogs, setAuditLogs] = useState<Audit[]>([]);
+  const [loadingAudits, setLoadingAudits] = useState(false);
 
   useEffect(() => {
     async function loadAdmin() {
@@ -53,6 +38,25 @@ export default function ConfiguracoesPage() {
 
     loadAdmin();
   }, []);
+
+  useEffect(() => {
+    async function loadAudits() {
+      if (activeTab === 'auditoria') {
+        setLoadingAudits(true);
+        try {
+          const audits = await getAudits();
+          setAuditLogs(audits);
+        } catch (error) {
+          console.error("Erro ao carregar auditoria:", error);
+          setAuditLogs([]);
+        } finally {
+          setLoadingAudits(false);
+        }
+      }
+    }
+
+    loadAudits();
+  }, [activeTab]);
 
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -243,19 +247,29 @@ export default function ConfiguracoesPage() {
               Mensagem de atualização
             </h2>
 
-            <div className="space-y-3">
-              {sampleAuditLogs.map((log, index) => (
-                <div
-                  key={log.id}
-                  className={`px-6 py-4 rounded-lg ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'
-                    }`}
-                >
-                  <p className="text-sm text-gray-600">
-                    {log.message} - {log.timestamp}
-                  </p>
-                </div>
-              ))}
-            </div>
+            {loadingAudits ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="text-gray-500">Carregando auditoria...</div>
+              </div>
+            ) : auditLogs.length === 0 ? (
+              <div className="flex justify-center items-center py-12">
+                <div className="text-gray-500">Nenhum registro de auditoria encontrado.</div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {auditLogs.map((log, index) => (
+                  <div
+                    key={log.id}
+                    className={`px-6 py-4 rounded-lg ${index % 2 === 0 ? 'bg-gray-100' : 'bg-white'
+                      }`}
+                  >
+                    <p className="text-sm text-gray-600">
+                      {log.message} - {log.timestamp}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </main>

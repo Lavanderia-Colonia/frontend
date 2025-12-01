@@ -1,80 +1,82 @@
-import { useState } from 'react';
-import { Search, Save } from 'lucide-react';
-
-interface Cliente {
-    id: string;
-    nome: string;
-    telefone: string;
-    endereco: string;
-}
+import { useState, useEffect, useRef } from 'react';
+import { Search, Save, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getClients, Client } from '@/services/clientService';
+import { IClientes } from '@/models/clientes';
 
 interface ClientModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelectCliente: (cliente: Cliente) => void;
+    onSelectCliente: (cliente: IClientes) => void;
 }
+
+const PAGE_SIZE = 10;
 
 export default function ClientModal({ isOpen, onClose, onSelectCliente }: ClientModalProps) {
     const [searchTerm, setSearchTerm] = useState("");
-    const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+    const [selectedCliente, setSelectedCliente] = useState<IClientes | null>(null);
+    const [clientes, setClientes] = useState<IClientes[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalElements, setTotalElements] = useState(0);
+    const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Dados de exemplo
-    const clientes: Cliente[] = [
-        {
-            id: "1",
-            nome: "Ana Carolina Souza",
-            telefone: "(11) 98765-4321",
-            endereco: "Rua Ipiranga, 123 - Centro"
-        },
-        {
-            id: "2",
-            nome: "Bruno Henrique Almeida",
-            telefone: "(11) 99812-7744",
-            endereco: "Av. Fernando Franco, 456"
-        },
-        {
-            id: "3",
-            nome: "Camila Ferreira Costa",
-            telefone: "(11) 98400-2211",
-            endereco: "Rua José Bonifácio, 789"
-        },
-        {
-            id: "4",
-            nome: "Diego Rafael Martins",
-            telefone: "(11) 99955-8800",
-            endereco: "Rua Souza Franco, 200"
-        },
-        {
-            id: "5",
-            nome: "Eduarda Silva Pereira",
-            telefone: "(11) 99123-4567",
-            endereco: "Av. João XXIII, 300 - Martins"
-        },
-        {
-            id: "6",
-            nome: "Felipe Augusto Ramos",
-            telefone: "(11) 98877-3344",
-            endereco: "Rua Carmem Santos, 150"
-        },
-        {
-            id: "7",
-            nome: "Gabriela Torres Lima",
-            telefone: "(11) 99321-5566",
-            endereco: "Rua Deodato Wertheim, 88"
-        },
-        {
-            id: "8",
-            nome: "Henrique Lopes Duarte",
-            telefone: "(11) 99700-6677",
-            endereco: "Av. Rodrigues Filho, 450, Mogi das Cruzes, São Paulo, São Paulo, Brasil"
+    useEffect(() => {
+        if (isOpen) {
+            // Limpar timeout anterior se existir
+            if (searchTimeoutRef.current) {
+                clearTimeout(searchTimeoutRef.current);
+            }
+
+            // Debounce: aguardar 500ms após o usuário parar de digitar
+            searchTimeoutRef.current = setTimeout(() => {
+                loadClients();
+            }, 500);
+
+            return () => {
+                if (searchTimeoutRef.current) {
+                    clearTimeout(searchTimeoutRef.current);
+                }
+            };
         }
-    ];
+    }, [isOpen, currentPage, searchTerm]);
 
-    const clientesFiltrados = clientes.filter(cliente =>
-        cliente.nome.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const loadClients = async () => {
+        setLoading(true);
+        try {
+            const response = await getClients(
+                currentPage,
+                PAGE_SIZE,
+                searchTerm
+            );
 
-    const handleRowClick = (cliente: Cliente) => {
+            // Converter Client da API para IClientes
+            const clientesConvertidos: IClientes[] = response.content
+                .filter(cliente => cliente.active) // Apenas clientes ativos
+                .map((cliente: Client) => ({
+                    id: String(cliente.id),
+                    nome: cliente.name,
+                    telefone: cliente.telephone,
+                    endereco: `${cliente.street}, ${cliente.number} – ${cliente.district}`
+                }));
+
+            setClientes(clientesConvertidos);
+            setTotalPages(response.totalPages);
+            setTotalElements(response.totalElements);
+        } catch (error) {
+            console.error('Erro ao carregar clientes:', error);
+            setClientes([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(0); // Resetar para primeira página ao buscar
+    };
+
+    const handleRowClick = (cliente: IClientes) => {
         setSelectedCliente(cliente);
     };
 
@@ -83,12 +85,14 @@ export default function ClientModal({ isOpen, onClose, onSelectCliente }: Client
             onSelectCliente(selectedCliente);
             setSelectedCliente(null);
             setSearchTerm("");
+            setCurrentPage(0);
         }
     };
 
     const handleVoltar = () => {
         setSelectedCliente(null);
         setSearchTerm("");
+        setCurrentPage(0);
         onClose();
     };
 
@@ -111,7 +115,7 @@ export default function ClientModal({ isOpen, onClose, onSelectCliente }: Client
                                 type="text"
                                 placeholder="Busque pelo nome"
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={handleSearchChange}
                                 className="
                                     w-full
                                     pl-10
@@ -129,46 +133,79 @@ export default function ClientModal({ isOpen, onClose, onSelectCliente }: Client
                 </div>
 
                 <div className="flex-1 overflow-auto mt-3 ml-6 mr-6 mb-6">
-                    <div className="overflow-x-auto">
-                        <table className="w-full whitespace-nowrap">
-                            <thead className="border-b-2 border-title">
-                                <tr>
-                                    <th className="text-left pb-3 text-title font-semibold pr-16">Nome do Cliente</th>
-                                    <th className="text-left pb-3 text-title font-semibold pr-16">Telefone</th>
-                                    <th className="text-left pb-3 text-title font-semibold pr-16">Endereço</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {clientesFiltrados.map((cliente, index) => (
-                                    <tr
-                                        key={cliente.id}
-                                        onClick={() => handleRowClick(cliente)}
-                                        className={`
-                                            cursor-pointer transition-colors
-                                            ${selectedCliente?.id === cliente.id
-                                                ? 'bg-blue-100 border-l-4 border-title'
-                                                : index % 2 === 0
-                                                    ? 'bg-white hover:bg-title/20'
-                                                    : 'bg-title/5 hover:bg-title/20'
-                                            }
-                                        `}
-                                    >
-                                        <td className="py-4 pl-2 pr-16 text-neutral">{cliente.nome}</td>
-                                        <td className="py-4 pr-16 text-neutral">{cliente.telefone}</td>
-                                        <td className="py-4 pr-16 text-neutral">{cliente.endereco}</td>
-                                    </tr>
-                                ))}
-                                {clientesFiltrados.length === 0 && (
+                    {loading ? (
+                        <div className="flex items-center justify-center py-8">
+                            <p className="text-neutral">Carregando clientes...</p>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full whitespace-nowrap">
+                                <thead className="border-b-2 border-title">
                                     <tr>
-                                        <td colSpan={3} className="py-8 text-center text-neutral">
-                                            Nenhum cliente encontrado
-                                        </td>
+                                        <th className="text-left pb-3 text-title font-semibold pr-16">Nome do Cliente</th>
+                                        <th className="text-left pb-3 text-title font-semibold pr-16">Telefone</th>
+                                        <th className="text-left pb-3 text-title font-semibold pr-16">Endereço</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    {clientes.map((cliente, index) => (
+                                        <tr
+                                            key={cliente.id}
+                                            onClick={() => handleRowClick(cliente)}
+                                            className={`
+                                                cursor-pointer transition-colors
+                                                ${selectedCliente?.id === cliente.id
+                                                    ? 'bg-blue-100 border-l-4 border-title'
+                                                    : index % 2 === 0
+                                                        ? 'bg-white hover:bg-title/20'
+                                                        : 'bg-title/5 hover:bg-title/20'
+                                                }
+                                            `}
+                                        >
+                                            <td className="py-4 pl-2 pr-16 text-neutral">{cliente.nome}</td>
+                                            <td className="py-4 pr-16 text-neutral">{cliente.telefone}</td>
+                                            <td className="py-4 pr-16 text-neutral">{cliente.endereco}</td>
+                                        </tr>
+                                    ))}
+                                    {clientes.length === 0 && !loading && (
+                                        <tr>
+                                            <td colSpan={3} className="py-8 text-center text-neutral">
+                                                Nenhum cliente encontrado
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
+
+                {!loading && totalPages > 1 && (
+                    <div className="px-6 pb-4 flex items-center justify-between">
+                        <span className="text-sm text-neutral/60">
+                            Mostrando {clientes.length} de {totalElements} clientes
+                        </span>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                                disabled={currentPage === 0}
+                                className="p-2 rounded hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ChevronLeft className="w-5 h-5 text-neutral/60" />
+                            </button>
+                            <span className="text-sm text-neutral/60">
+                                Página {currentPage + 1} de {totalPages}
+                            </span>
+                            <button
+                                onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                                disabled={currentPage === totalPages - 1}
+                                className="p-2 rounded hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <ChevronRight className="w-5 h-5 text-neutral/60" />
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 <div className="p-6 border-t flex gap-4">
                     <button
